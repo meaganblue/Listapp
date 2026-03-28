@@ -1,53 +1,70 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "./supabase";
 
+// ─────────────────────────────────────────────
+// THEMES
+// ─────────────────────────────────────────────
 const THEMES = {
-  muppets: {
-    name: "The Muppet Show", emoji: "🎭",
-    bg: "#1C1228", bgCard: "#261A36", bgHeader: "#120D1C", bgInput: "#2E2040",
-    border: "#7B4FA6", borderLight: "#4A2D6A",
-    text: "#F0E6FF", textMid: "#C9A8F5", textMuted: "#9066C8", textFaint: "#5C3D8A",
-    accent: "#E84B8A", danger: "#FF4466",
-    pillOn: "#E84B8A", pillOnText: "#fff", pillOff: "#2E2040", pillOffText: "#C9A8F5",
-    sectionBg: "#221530", sectionBorder: "#5C3D8A",
+  beautyandthebeast: {
+    name: "Beauty and the Beast", emoji: "🌹",
+    bg: "#FDF6E3", bgCard: "#FFF8ED", bgHeader: "#1B2A6B", bgInput: "#FFF8ED",
+    border: "#C9A84C", borderLight: "#E8D48A",
+    text: "#1B2A6B", textMid: "#3D4F8A", textMuted: "#8A7A3A", textFaint: "#C9A84C",
+    accent: "#C9A84C", danger: "#8B1A1A",
+    pillOn: "#1B2A6B", pillOnText: "#FDF6E3", pillOff: "#EDE4C0", pillOffText: "#3D4F8A",
+    sectionBg: "#EDE4C0", sectionBorder: "#C9A84C",
     font: "'Palatino Linotype', 'Book Antiqua', Palatino, serif",
     headerFont: "'Georgia', serif",
   },
-  hitchhiker: {
-    name: "Hitchhiker's Guide", emoji: "🌌",
-    bg: "#0D1117", bgCard: "#161B22", bgHeader: "#0A0E14", bgInput: "#1C2128",
-    border: "#30A0FF", borderLight: "#1A4A7A",
-    text: "#E6F1FF", textMid: "#88C4FF", textMuted: "#4A90D9", textFaint: "#2A5A9A",
-    accent: "#00FF9C", danger: "#FF4444",
-    pillOn: "#00FF9C", pillOnText: "#0D1117", pillOff: "#1C2840", pillOffText: "#88C4FF",
-    sectionBg: "#111823", sectionBorder: "#1E3A5F",
-    font: "'Courier New', Courier, monospace",
-    headerFont: "'Courier New', Courier, monospace",
-  },
-  gilmore: {
-    name: "Gilmore Girls", emoji: "☕",
-    bg: "#E8F4F0", bgCard: "#F2FAF7", bgHeader: "#2D6A4F", bgInput: "#F5FCFA",
-    border: "#52B788", borderLight: "#95D5B2",
-    text: "#1B3A2D", textMid: "#2D6A4F", textMuted: "#52B788", textFaint: "#95D5B2",
-    accent: "#1B3A2D", danger: "#8B2020",
-    pillOn: "#1B3A2D", pillOnText: "#E8F4F0", pillOff: "#D8F3DC", pillOffText: "#2D6A4F",
-    sectionBg: "#D8F3DC", sectionBorder: "#52B788",
-    font: "'Garamond', 'EB Garamond', Georgia, serif",
-    headerFont: "'Garamond', Georgia, serif",
-  },
   toystory: {
     name: "Toy Story", emoji: "🚀",
-    bg: "#EEF6FF", bgCard: "#F8FBFF", bgHeader: "#1A6FBF", bgInput: "#F0F8FF",
-    border: "#4A9FE0", borderLight: "#A8D4F5",
-    text: "#0D2B4A", textMid: "#1A5A8A", textMuted: "#4A90C0", textFaint: "#8ABCDC",
-    accent: "#E8441A", danger: "#C0200A",
-    pillOn: "#E8441A", pillOnText: "#fff", pillOff: "#D0EAFF", pillOffText: "#1A5A8A",
-    sectionBg: "#E0F0FF", sectionBorder: "#4A9FE0",
+    bg: "#87CEEB", bgCard: "#FFFFFF", bgHeader: "#8B4513", bgInput: "#F0F8FF",
+    border: "#1A5276", borderLight: "#A9CCE3",
+    text: "#1A2F5A", textMid: "#1A5276", textMuted: "#2E86C1", textFaint: "#85C1E9",
+    accent: "#C0392B", danger: "#7B241C",
+    pillOn: "#C0392B", pillOnText: "#fff", pillOff: "#D6EAF8", pillOffText: "#1A5276",
+    sectionBg: "#EBF5FB", sectionBorder: "#1A5276",
     font: "'Trebuchet MS', 'Gill Sans', sans-serif",
     headerFont: "'Trebuchet MS', sans-serif",
   },
+  gilmore: {
+    name: "Gilmore Girls", emoji: "☕",
+    bg: "#F0F4F8", bgCard: "#FFFFFF", bgHeader: "#1B2A4A", bgInput: "#F8FAFC",
+    border: "#B0BEC5", borderLight: "#CFD8DC",
+    text: "#1B2A4A", textMid: "#37474F", textMuted: "#78909C", textFaint: "#B0BEC5",
+    accent: "#1B2A4A", danger: "#8B2020",
+    pillOn: "#1B2A4A", pillOnText: "#F0F4F8", pillOff: "#E3E8EE", pillOffText: "#37474F",
+    sectionBg: "#E8EDF2", sectionBorder: "#B0BEC5",
+    font: "'Garamond', 'EB Garamond', Georgia, serif",
+    headerFont: "'Garamond', Georgia, serif",
+  },
+  muppets: {
+    name: "The Muppet Show", emoji: "🎭",
+    bg: "#F5F0E0", bgCard: "#FFFBF0", bgHeader: "#2E7D32", bgInput: "#FFFBF0",
+    border: "#C62828", borderLight: "#EF9A9A",
+    text: "#1B0000", textMid: "#4A0000", textMuted: "#C62828", textFaint: "#EF9A9A",
+    accent: "#C62828", danger: "#7B0000",
+    pillOn: "#2E7D32", pillOnText: "#F5F0E0", pillOff: "#F5F0E0", pillOffText: "#2E7D32",
+    sectionBg: "#E8F5E9", sectionBorder: "#2E7D32",
+    font: "'Palatino Linotype', 'Book Antiqua', Palatino, serif",
+    headerFont: "'Georgia', serif",
+  },
+  agatha: {
+    name: "Agatha All Along", emoji: "🔮",
+    bg: "#F3F0F8", bgCard: "#FFFFFF", bgHeader: "#3B1F5E", bgInput: "#F8F6FC",
+    border: "#7E57C2", borderLight: "#C5B3E6",
+    text: "#1A0A2E", textMid: "#3B1F5E", textMuted: "#7E57C2", textFaint: "#C5B3E6",
+    accent: "#5B8A5F", danger: "#8B1A1A",
+    pillOn: "#3B1F5E", pillOnText: "#F3F0F8", pillOff: "#EDE8F8", pillOffText: "#3B1F5E",
+    sectionBg: "#EDE8F8", sectionBorder: "#7E57C2",
+    font: "'Garamond', 'EB Garamond', Georgia, serif",
+    headerFont: "'Garamond', Georgia, serif",
+  },
 };
 
+// ─────────────────────────────────────────────
+// TAXONOMIES
+// ─────────────────────────────────────────────
 const WATCH_SECTIONS = {
   Movies:        { icon: "🎬", genres: ["Horror","Comedy","Rom-Com","Action","Drama","Sci-Fi","Thriller","Fantasy","Family","Animation","Documentary","Other"] },
   Shows:         { icon: "📺", genres: ["Horror","Comedy","Drama","Sci-Fi","Thriller","Fantasy","Action","Reality","Anime","Family","Documentary","Other"] },
@@ -91,6 +108,7 @@ async function dbGetItems(userId, listType) {
     genre: row.genre, genres: row.genres || [],
     notes: row.notes, status: row.status, added: row.added,
     desc: row.description, rating: row.rating, _listType: listType,
+    author: row.author || "",
   }));
 }
 async function dbAddItem(userId, item, listType) {
@@ -100,6 +118,7 @@ async function dbAddItem(userId, item, listType) {
     section: item.section, genre: item.genre, genres: item.genres || [],
     notes: item.notes || "", status: item.status, added: item.added,
     description: item.desc || "", rating: item.rating || 0, list_type: listType,
+    author: item.author || "",
   });
 }
 async function dbUpdateItem(userId, item, listType) {
@@ -108,6 +127,7 @@ async function dbUpdateItem(userId, item, listType) {
     status: item.status, rating: item.rating,
     description: item.desc || "", notes: item.notes || "",
     section: item.section, genre: item.genre, genres: item.genres || [],
+    author: item.author || "",
   }).eq("id", item.id).eq("user_id", userId);
 }
 async function dbDeleteItem(userId, itemId, listType) {
@@ -137,13 +157,11 @@ async function autoDetectGenre(title, listType) {
   const allGenres = listType === "watch"
     ? [...new Set(Object.values(WATCH_SECTIONS).flatMap(s => s.genres))]
     : [...new Set(Object.values(READ_SECTIONS).flatMap(s => s.genres))];
-
   const prompt = `For the ${listType === "watch" ? "film/show/documentary" : "book"} titled "${title}", return ONLY a JSON object with these exact keys:
 - "section": one of [${sections.map(s => `"${s}"`).join(", ")}]
 - "genres": array of 1-3 most fitting genres from [${allGenres.map(g => `"${g}"`).join(", ")}]
 - "desc": one sentence description (max 20 words)
 Return only the JSON, no other text.`;
-
   try {
     const raw = await callClaude(prompt, 150);
     const cleaned = raw.replace(/```json|```/g, "").trim();
@@ -155,6 +173,19 @@ Return only the JSON, no other text.`;
     };
   } catch {
     return { section: sections[0], genres: ["Other"], desc: "" };
+  }
+}
+
+async function fetchSuggestions(query, listType) {
+  if (!query || query.length < 2) return [];
+  const typeHint = listType === "watch" ? "films, TV shows, and documentaries" : "books";
+  const prompt = `List 6 real ${typeHint} whose titles start with or closely match "${query}". Return ONLY a JSON array of objects with keys "title" and "year". Example: [{"title":"The Matrix","year":"1999"}]. No other text.`;
+  try {
+    const raw = await callClaude(prompt, 200);
+    const cleaned = raw.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleaned);
+  } catch {
+    return [];
   }
 }
 
@@ -173,6 +204,54 @@ async function generateSuggestions(watchItems, readItems) {
 }
 
 // ─────────────────────────────────────────────
+// DOWNLOAD HELPERS
+// ─────────────────────────────────────────────
+function downloadCSV(items, listType, profileName) {
+  const headers = listType === "read"
+    ? ["Title","Author","Section","Genres","Status","Rating","Notes"]
+    : ["Title","Section","Genres","Status","Rating","Notes"];
+  const rows = items.map(i => {
+    const genres = (i.genres?.length ? i.genres : i.genre ? [i.genre] : []).join("; ");
+    const rating = i.rating > 0 ? `${i.rating}/5` : "";
+    if (listType === "read") return [i.title, i.author || "", i.section, genres, i.status, rating, i.notes || ""];
+    return [i.title, i.section, genres, i.status, rating, i.notes || ""];
+  });
+  const csv = [headers, ...rows].map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `${profileName}-${listType}-list.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadTXT(items, listType, profileName) {
+  const lines = [`${profileName}'s ${listType === "watch" ? "Watch" : "Read"} List`, "=".repeat(40), ""];
+  const bySection = {};
+  items.forEach(i => {
+    if (!bySection[i.section]) bySection[i.section] = [];
+    bySection[i.section].push(i);
+  });
+  Object.entries(bySection).forEach(([section, sItems]) => {
+    lines.push(`── ${section} ──`);
+    sItems.forEach(i => {
+      const rating = i.rating > 0 ? ` [${"★".repeat(i.rating)}]` : "";
+      const author = listType === "read" && i.author ? ` by ${i.author}` : "";
+      const genres = (i.genres?.length ? i.genres : i.genre ? [i.genre] : []).join(", ");
+      lines.push(`  ${i.title}${author}${rating}`);
+      if (genres) lines.push(`    genres: ${genres}`);
+      if (i.status !== "unwatched" && i.status !== "unread") lines.push(`    status: ${i.status}`);
+      if (i.notes) lines.push(`    notes: ${i.notes}`);
+    });
+    lines.push("");
+  });
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `${profileName}-${listType}-list.txt`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─────────────────────────────────────────────
 // AUTH PAGE
 // ─────────────────────────────────────────────
 function AuthPage({ onAuth }) {
@@ -181,7 +260,6 @@ function AuthPage({ onAuth }) {
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
-
   const fakeEmail = (u) => `${u.toLowerCase().replace(/[^a-z0-9]/g, "")}@lists.app`;
 
   const handle = async () => {
@@ -189,19 +267,17 @@ function AuthPage({ onAuth }) {
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     setLoading(true); setError("");
     const email = fakeEmail(username.trim());
-
     if (mode === "signup") {
       const { data: existing } = await supabase.from("accounts").select("id").eq("username", username.trim().toLowerCase()).maybeSingle();
       if (existing) { setError("That username is already taken."); setLoading(false); return; }
       const { data, error: err } = await supabase.auth.signUp({ email, password });
       if (err) { setError(err.message); setLoading(false); return; }
       await supabase.from("accounts").insert({ id: data.user.id, username: username.trim().toLowerCase() });
-      onAuth(data.user, username.trim());
+      onAuth(data.user);
     } else {
       const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
       if (err) { setError("Invalid username or password."); setLoading(false); return; }
-      const { data: acct } = await supabase.from("accounts").select("username").eq("id", data.user.id).maybeSingle();
-      onAuth(data.user, acct?.username || username.trim());
+      onAuth(data.user);
     }
     setLoading(false);
   };
@@ -284,11 +360,12 @@ function RatingModal({ item, onRate, onClose, theme: T }) {
 // ─────────────────────────────────────────────
 // EDIT MODAL
 // ─────────────────────────────────────────────
-function EditModal({ item, sections, onSave, onClose, theme: T }) {
+function EditModal({ item, sections, onSave, onClose, theme: T, listType }) {
   const sectionKeys = Object.keys(sections);
   const [section, setSection] = useState(item.section || sectionKeys[0]);
   const [selectedGenres, setSelectedGenres] = useState(item.genres?.length ? item.genres : item.genre ? [item.genre] : ["Other"]);
   const [notes, setNotes] = useState(item.notes || "");
+  const [author, setAuthor] = useState(item.author || "");
   const availableGenres = sections[section]?.genres || ["Other"];
   const toggleGenre = (g) => {
     setSelectedGenres(prev => prev.includes(g) ? prev.filter(x => x !== g) : prev.length < 3 ? [...prev, g] : prev);
@@ -298,6 +375,15 @@ function EditModal({ item, sections, onSave, onClose, theme: T }) {
       <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 14, padding: "1.5rem", maxWidth: 400, width: "100%", fontFamily: T.font, maxHeight: "85vh", overflowY: "auto" }}>
         <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.12em", color: T.textMuted, marginBottom: "0.3rem" }}>Edit entry</div>
         <div style={{ fontSize: "1rem", color: T.text, fontFamily: T.headerFont, marginBottom: "1.2rem", lineHeight: 1.3 }}>{item.title}</div>
+
+        {listType === "read" && (
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>Author</label>
+            <input value={author} onChange={e => setAuthor(e.target.value)} placeholder="Author name…"
+              style={{ width: "100%", background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.4rem 0.6rem", fontSize: "0.85rem", fontFamily: T.font, outline: "none", boxSizing: "border-box" }} />
+          </div>
+        )}
+
         <div style={{ marginBottom: "1rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>Section</label>
           <select value={section} onChange={e => { setSection(e.target.value); setSelectedGenres(["Other"]); }}
@@ -305,6 +391,7 @@ function EditModal({ item, sections, onSave, onClose, theme: T }) {
             {sectionKeys.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
+
         <div style={{ marginBottom: "1rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>
             Genres <span style={{ color: T.textFaint, textTransform: "none", letterSpacing: 0 }}>(up to 3)</span>
@@ -320,14 +407,16 @@ function EditModal({ item, sections, onSave, onClose, theme: T }) {
             ))}
           </div>
         </div>
+
         <div style={{ marginBottom: "1.3rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>Notes</label>
           <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes…"
             style={{ width: "100%", background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.4rem 0.6rem", fontSize: "0.85rem", fontFamily: T.font, outline: "none", boxSizing: "border-box" }} />
         </div>
+
         <div style={{ display: "flex", gap: "0.6rem", justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 6, color: T.textMuted, padding: "0.4rem 1rem", fontSize: "0.82rem", fontFamily: T.font, cursor: "pointer" }}>Cancel</button>
-          <button onClick={() => { onSave({ section, genres: selectedGenres, genre: selectedGenres[0], notes }); onClose(); }}
+          <button onClick={() => { onSave({ section, genres: selectedGenres, genre: selectedGenres[0], notes, author }); onClose(); }}
             style={{ background: T.accent, border: "none", borderRadius: 6, color: "#fff", padding: "0.4rem 1.2rem", fontSize: "0.82rem", fontFamily: T.font, cursor: "pointer", fontWeight: "bold" }}>Save</button>
         </div>
       </div>
@@ -375,6 +464,9 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
           <div style={{ fontSize: "0.88rem", color: done ? T.textMuted : T.text, textDecoration: done ? "line-through" : "none", fontFamily: T.font, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {item.title}
           </div>
+          {item.author && (
+            <div style={{ fontSize: "0.68rem", color: T.textMuted, marginTop: "0.1rem", fontStyle: "italic" }}>by {item.author}</div>
+          )}
           {genreList.length > 0 && (
             <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap", marginTop: "0.2rem" }}>
               {genreList.map(g => (
@@ -448,9 +540,9 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
   const [open, setOpen] = useState(true);
   const todoStatus = listType === "read" ? "unread" : "unwatched";
   const filtered = items.filter(i =>
-    i.section === sectionKey &&
-    i.status === todoStatus &&
-    i.title.toLowerCase().includes(search.toLowerCase())
+    i.section === sectionKey && i.status === todoStatus &&
+    (i.title.toLowerCase().includes(search.toLowerCase()) ||
+     (i.author && i.author.toLowerCase().includes(search.toLowerCase())))
   );
   if (filtered.length === 0) return null;
 
@@ -498,31 +590,80 @@ function ArchiveSection({ items, onCycle, onRateRequest, onRemove, onEdit, onDes
 }
 
 // ─────────────────────────────────────────────
-// ADD FORM
+// ADD FORM with autocomplete
 // ─────────────────────────────────────────────
 function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
-  const [title, setTitle]         = useState("");
-  const [detecting, setDetecting] = useState(false);
+  const [title, setTitle]           = useState("");
+  const [author, setAuthor]         = useState("");
+  const [detecting, setDetecting]   = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSugg, setShowSugg]     = useState(false);
+  const [loadingSugg, setLoadingSugg] = useState(false);
   const inputRef = useRef(null);
+  const suggTimer = useRef(null);
+
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const handleTitleChange = (val) => {
+    setTitle(val);
+    setShowSugg(true);
+    clearTimeout(suggTimer.current);
+    if (val.length < 2) { setSuggestions([]); return; }
+    setLoadingSugg(true);
+    suggTimer.current = setTimeout(async () => {
+      const results = await fetchSuggestions(val, listType);
+      setSuggestions(results);
+      setLoadingSugg(false);
+    }, 600);
+  };
+
+  const selectSuggestion = (s) => {
+    setTitle(s.title);
+    setShowSugg(false);
+    setSuggestions([]);
+  };
 
   const handleAdd = async () => {
     if (!title.trim()) return;
     setDetecting(true);
     const detected = await autoDetectGenre(title.trim(), listType);
     setDetecting(false);
-    onAdd({ title: title.trim(), ...detected });
+    onAdd({ title: title.trim(), author: author.trim(), ...detected });
   };
 
   return (
-    <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "1rem", marginBottom: "1rem" }}>
-      <input ref={inputRef} value={title} onChange={e => setTitle(e.target.value)}
-        onKeyDown={e => { if (e.key === "Enter" && title.trim()) handleAdd(); if (e.key === "Escape") onClose(); }}
-        placeholder="Title… (press Enter)"
-        style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${T.border}`, color: T.text, padding: "0.35rem 0", fontSize: "1rem", fontFamily: T.font, outline: "none", marginBottom: "0.75rem", boxSizing: "border-box" }}
-      />
+    <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "1rem", marginBottom: "1rem", position: "relative" }}>
+      <div style={{ position: "relative" }}>
+        <input ref={inputRef} value={title} onChange={e => handleTitleChange(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && title.trim()) handleAdd(); if (e.key === "Escape") onClose(); }}
+          onBlur={() => setTimeout(() => setShowSugg(false), 200)}
+          placeholder="Title… (type to search)"
+          style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${T.border}`, color: T.text, padding: "0.35rem 0", fontSize: "1rem", fontFamily: T.font, outline: "none", marginBottom: "0.5rem", boxSizing: "border-box" }}
+        />
+        {showSugg && (suggestions.length > 0 || loadingSugg) && (
+          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, zIndex: 50, boxShadow: "0 4px 16px rgba(0,0,0,0.15)", maxHeight: 220, overflowY: "auto" }}>
+            {loadingSugg && <div style={{ padding: "0.6rem 0.85rem", fontSize: "0.75rem", color: T.textFaint }}>Searching…</div>}
+            {suggestions.map((s, i) => (
+              <button key={i} onMouseDown={() => selectSuggestion(s)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "transparent", border: "none", padding: "0.55rem 0.85rem", cursor: "pointer", textAlign: "left", borderBottom: `1px solid ${T.borderLight}` }}
+                onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >
+                <span style={{ fontSize: "0.85rem", color: T.text, fontFamily: T.font }}>{s.title}</span>
+                {s.year && <span style={{ fontSize: "0.7rem", color: T.textFaint }}>{s.year}</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {listType === "read" && (
+        <input value={author} onChange={e => setAuthor(e.target.value)} placeholder="Author (optional)"
+          style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${T.borderLight}`, color: T.text, padding: "0.3rem 0", fontSize: "0.88rem", fontFamily: T.font, outline: "none", marginBottom: "0.75rem", boxSizing: "border-box", fontStyle: "italic" }}
+        />
+      )}
+
       {detecting && <div style={{ fontSize: "0.75rem", color: T.textMuted, marginBottom: "0.5rem" }}>✨ Auto-detecting genre…</div>}
-      <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+      <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", marginTop: "0.75rem" }}>
         <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, color: T.textMuted, padding: "0.3rem 0.85rem", fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer" }}>Cancel</button>
         <button onClick={handleAdd} disabled={detecting || !title.trim()}
           style={{ background: T.accent, border: "none", borderRadius: 5, color: "#fff", padding: "0.3rem 0.95rem", fontSize: "0.8rem", fontFamily: T.font, cursor: detecting ? "not-allowed" : "pointer", fontWeight: "bold", opacity: detecting ? 0.7 : 1 }}>
@@ -534,7 +675,7 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
 }
 
 // ─────────────────────────────────────────────
-// SUGGESTIONS
+// SUGGESTIONS PAGE
 // ─────────────────────────────────────────────
 function SuggestionsPage({ userId, theme: T }) {
   const [watchItems, setWatchItems] = useState([]);
@@ -581,7 +722,7 @@ function SuggestionsPage({ userId, theme: T }) {
 // ─────────────────────────────────────────────
 // LIST PAGE
 // ─────────────────────────────────────────────
-function ListPage({ userId, listType, sections, theme: T }) {
+function ListPage({ userId, listType, sections, theme: T, profileName }) {
   const todoStatus = listType === "watch" ? "unwatched" : "unread";
   const wipStatus  = listType === "watch" ? "watching"  : "reading";
   const doneStatus = listType === "watch" ? "watched"   : "read";
@@ -593,6 +734,7 @@ function ListPage({ userId, listType, sections, theme: T }) {
   const [adding, setAdding]         = useState(false);
   const [ratingItem, setRatingItem] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [showDownload, setShowDownload] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -616,9 +758,9 @@ function ListPage({ userId, listType, sections, theme: T }) {
     setItems(prev => prev.filter(i => i.id !== id));
   }, [userId, listType]);
 
-  const addItem = async ({ title, section, genres, genre, desc }) => {
+  const addItem = async ({ title, section, genres, genre, desc, author }) => {
     const id = Date.now();
-    const newItem = { id, title, section, genre: genre || genres?.[0] || "Other", genres: genres || [], notes: "", status: todoStatus, added: id, desc: desc || "", rating: 0, _listType: listType };
+    const newItem = { id, title, section, genre: genre || genres?.[0] || "Other", genres: genres || [], notes: "", status: todoStatus, added: id, desc: desc || "", rating: 0, _listType: listType, author: author || "" };
     await dbAddItem(userId, newItem, listType);
     setItems(prev => [newItem, ...prev]);
     setAdding(false);
@@ -656,7 +798,7 @@ function ListPage({ userId, listType, sections, theme: T }) {
 
   return (
     <div>
-      <div style={{ display: "flex", gap: "0.3rem", marginBottom: "1.2rem", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "0.3rem", marginBottom: "1.2rem", flexWrap: "wrap", alignItems: "center" }}>
         {subTabs.map(t => (
           <button key={t.key} onClick={() => setSubTab(t.key)} style={{
             background: subTab === t.key ? T.pillOn : T.pillOff,
@@ -665,12 +807,32 @@ function ListPage({ userId, listType, sections, theme: T }) {
             padding: "0.3rem 0.9rem", fontSize: "0.77rem", fontFamily: T.font, cursor: "pointer", transition: "all 0.15s",
           }}>{t.label}{t.count > 0 && <span style={{ opacity: 0.7 }}> ({t.count})</span>}</button>
         ))}
+        {/* Download button */}
+        <div style={{ marginLeft: "auto", position: "relative" }}>
+          <button onClick={() => setShowDownload(s => !s)} style={{ background: T.sectionBg, border: `1px solid ${T.border}`, borderRadius: 20, color: T.textMuted, padding: "0.3rem 0.75rem", fontSize: "0.72rem", fontFamily: T.font, cursor: "pointer" }}>
+            ⬇ Export
+          </button>
+          {showDownload && (
+            <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.4rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: "0.4rem", zIndex: 50, minWidth: 130, boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }}>
+              <button onClick={() => { downloadCSV(items, listType, profileName); setShowDownload(false); }}
+                style={{ width: "100%", background: "transparent", border: "none", padding: "0.4rem 0.6rem", color: T.text, fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer", textAlign: "left", borderRadius: 5 }}
+                onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >📊 Download CSV</button>
+              <button onClick={() => { downloadTXT(items, listType, profileName); setShowDownload(false); }}
+                style={{ width: "100%", background: "transparent", border: "none", padding: "0.4rem 0.6rem", color: T.text, fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer", textAlign: "left", borderRadius: 5 }}
+                onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >📄 Download TXT</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {subTab === "list" && (
         <>
           <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search titles or authors…"
               style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.38rem 0.7rem", fontSize: "0.83rem", fontFamily: T.font, outline: "none" }} />
           </div>
           {adding
@@ -700,7 +862,8 @@ function ListPage({ userId, listType, sections, theme: T }) {
       )}
 
       {ratingItem && <RatingModal item={ratingItem} onRate={r => rateItem(ratingItem.id, r)} onClose={() => setRatingItem(null)} theme={T} />}
-      {editingItem && <EditModal item={editingItem} sections={sections} onSave={changes => saveEdit(editingItem.id, changes)} onClose={() => setEditingItem(null)} theme={T} />}
+      {editingItem && <EditModal item={editingItem} sections={sections} onSave={changes => saveEdit(editingItem.id, changes)} onClose={() => setEditingItem(null)} theme={T} listType={listType} />}
+      {showDownload && <div style={{ position: "fixed", inset: 0, zIndex: 40 }} onClick={() => setShowDownload(false)} />}
     </div>
   );
 }
@@ -722,7 +885,7 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
 
       <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "2.5rem" }}>
         {profiles.map(u => {
-          const T = THEMES[u.theme || "gilmore"];
+          const T = THEMES[u.theme || "beautyandthebeast"];
           return (
             <div key={u.id} style={{ position: "relative" }}>
               <button onClick={() => onSelect(u.id)} style={{ width: 130, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "1.5rem 1rem", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem", transition: "all 0.2s" }}
@@ -742,7 +905,7 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
                 )}
               </div>
               {editingTheme === u.id && (
-                <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: "50%", transform: "translateX(-50%)", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "0.75rem", zIndex: 50, width: 200 }}>
+                <div style={{ position: "absolute", top: "calc(100% + 0.5rem)", left: "50%", transform: "translateX(-50%)", background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "0.75rem", zIndex: 50, width: 210 }}>
                   {Object.entries(THEMES).map(([tk, th]) => (
                     <button key={tk} onClick={() => { onThemeChange(u.id, tk); setEditingTheme(null); }}
                       style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: u.theme === tk ? "rgba(255,255,255,0.1)" : "transparent", border: "none", borderRadius: 6, padding: "0.4rem 0.6rem", cursor: "pointer", color: "#E0D4FF", fontSize: "0.78rem", fontFamily: "Georgia, serif", marginBottom: "0.2rem" }}>
@@ -820,9 +983,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "#1a1a2e", display: "flex", alignItems: "center", justifyContent: "center", color: "#8888BB", fontFamily: "Georgia, serif" }}>Loading…</div>
   );
 
-  if (!authUser) return (
-    <AuthPage onAuth={(user) => setAuthUser(user)} />
-  );
+  if (!authUser) return <AuthPage onAuth={(user) => setAuthUser(user)} />;
 
   if (!activeProfile || !profiles.find(p => p.id === activeProfile)) {
     return (
@@ -857,7 +1018,7 @@ export default function App() {
   }
 
   const profile = profiles.find(p => p.id === activeProfile);
-  const T = THEMES[profile.theme || "gilmore"];
+  const T = THEMES[profile.theme || "beautyandthebeast"];
 
   const mainTabs = [
     { key: "watch",   label: "🎬 Watch" },
@@ -872,10 +1033,10 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.9rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
               <span style={{ fontSize: "1.2rem" }}>{profile.avatar}</span>
-              <span style={{ fontSize: "0.95rem", fontFamily: T.headerFont, color: T.text, fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
+              <span style={{ fontSize: "0.95rem", fontFamily: T.headerFont, color: "#fff", fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
             </div>
             <div style={{ position: "relative" }}>
-              <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(0,0,0,0.08)", border: `1px solid ${T.border}`, borderRadius: 20, padding: "0.28rem 0.75rem", fontSize: "0.73rem", fontFamily: T.font, color: T.textMid, cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+              <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "0.28rem 0.75rem", fontSize: "0.73rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem" }}>
                 <span>⇄</span><span>Switch</span>
               </button>
               {showSwitch && (
@@ -905,10 +1066,10 @@ export default function App() {
             {mainTabs.map(t => (
               <button key={t.key} onClick={() => setMainTab(t.key)} style={{
                 background: mainTab === t.key ? T.bg : "transparent",
-                border: `1px solid ${T.border}`,
-                borderBottom: mainTab === t.key ? `1px solid ${T.bg}` : `1px solid ${T.border}`,
+                border: `1px solid ${mainTab === t.key ? T.border : "rgba(255,255,255,0.3)"}`,
+                borderBottom: mainTab === t.key ? `1px solid ${T.bg}` : "1px solid rgba(255,255,255,0.3)",
                 borderRadius: "7px 7px 0 0",
-                color: mainTab === t.key ? T.accent : T.textMuted,
+                color: mainTab === t.key ? T.accent : "rgba(255,255,255,0.8)",
                 padding: "0.38rem 0.95rem", fontSize: "0.78rem", fontFamily: T.font,
                 cursor: "pointer", marginRight: "0.2rem",
                 fontWeight: mainTab === t.key ? "bold" : "normal",
@@ -920,8 +1081,8 @@ export default function App() {
       </div>
 
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "1.4rem 1.2rem 5rem" }}>
-        {mainTab === "watch"   && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} />}
-        {mainTab === "read"    && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} />}
+        {mainTab === "watch"   && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
+        {mainTab === "read"    && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} profileName={profile.name} />}
         {mainTab === "suggest" && <SuggestionsPage key={`s-${profile.id}`} userId={profile.id} theme={T} />}
       </div>
 
