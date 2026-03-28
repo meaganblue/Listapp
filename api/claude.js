@@ -1,9 +1,9 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const key = process.env.ANTHROPIC_KEY;
   if (!key) {
-    return res.status(500).json({ error: 'Missing ANTHROPIC_KEY environment variable' });
+    return res.status(500).json({ error: 'Missing ANTHROPIC_KEY' });
   }
 
   try {
