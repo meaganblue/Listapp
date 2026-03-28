@@ -884,8 +884,8 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
       <div style={{ color: "#8888BB", fontSize: "0.78rem", marginBottom: "3rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>Who's watching?</div>
 
       <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "2.5rem" }}>
-        {profiles.map(u => {
-          const T = THEMES[profile?.theme] || THEMES.beautyandthebeast;
+        const T = THEMES[u?.theme] || THEMES.beautyandthebeast;
+
           return (
             <div key={u.id} style={{ position: "relative" }}>
               <button onClick={() => onSelect(u.id)} style={{ width: 130, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "1.5rem 1rem", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem", transition: "all 0.2s" }}
