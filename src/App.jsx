@@ -566,7 +566,17 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
       {open && (
         <div style={{ paddingLeft: "0.4rem" }}>
           {sectionDef.genres.map(g => (
-            <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={onDescUpdate} theme={T} />
+            <GenreSection 
+              key={g} 
+              genre={g} 
+              items={byGenre[g] || []} 
+              onCycle={onCycle} 
+              onRemove={onRemove} 
+              onRateRequest={onRateRequest} 
+              onEdit={onEdit} 
+              onDescUpdate={onDescUpdate} 
+              theme={T} 
+            />
           ))}
         </div>
       )}
@@ -846,18 +856,49 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
             <div style={{ color: T.textFaint, textAlign: "center", padding: "3rem 0", fontSize: "0.85rem" }}>Nothing here yet. Add something!</div>
           )}
           {Object.entries(sections).map(([key, def]) => (
-            <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} listType={listType} />
+            <MainSection 
+              key={key} 
+              sectionKey={key} 
+              sectionDef={def} 
+              items={items} 
+              onCycle={cycleStatus} 
+              onRemove={removeItem} 
+              onRateRequest={setRatingItem} 
+              onEdit={setEditingItem} 
+              onDescUpdate={updateDesc} 
+              theme={T} 
+              search={search} 
+              listType={listType} 
+            />
           ))}
         </>
       )}
 
       {subTab === "wip" && (
-        <ArchiveSection items={wipItems} onCycle={cycleStatus} onRateRequest={setRatingItem} onRemove={removeItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T}
-          title={listType === "watch" ? "Currently watching" : "Currently reading"} emptyMsg="Nothing in progress." canCycle={true} />
+        <ArchiveSection 
+          items={wipItems} 
+          onCycle={cycleStatus} 
+          onRateRequest={setRatingItem} 
+          onRemove={removeItem} 
+          onEdit={setEditingItem} 
+          onDescUpdate={updateDesc} 
+          theme={T}
+          title={listType === "watch" ? "Currently watching" : "Currently reading"} 
+          emptyMsg="Nothing in progress." 
+          canCycle={true} 
+        />
       )}
       {subTab === "done" && (
-        <ArchiveSection items={doneItems} onRateRequest={setRatingItem} onRemove={removeItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T}
-          title={listType === "watch" ? "Finished" : "Finished reading"} emptyMsg="Nothing finished yet." />
+        <ArchiveSection 
+          items={doneItems} 
+          onRateRequest={setRatingItem} 
+          onRemove={removeItem} 
+          onEdit={setEditingItem} 
+          onDescUpdate={updateDesc} 
+          theme={T}
+          title={listType === "watch" ? "Finished" : "Finished reading"} 
+          emptyMsg="Nothing finished yet." 
+        />
       )}
 
       {ratingItem && <RatingModal item={ratingItem} onRate={r => rateItem(ratingItem.id, r)} onClose={() => setRatingItem(null)} theme={T} />}
@@ -884,7 +925,8 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
 
       <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "2.5rem" }}>
         {profiles.map(u => {
-          const T = THEMES[u?.theme] || THEMES.beautyandthebeast;
+          // Robust theme safety net
+          const T = (u?.theme && THEMES[u.theme]) ? THEMES[u.theme] : THEMES.beautyandthebeast;
           return (
             <div key={u.id} style={{ position: "relative" }}>
               <button onClick={() => onSelect(u.id)} style={{ width: 130, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "1.5rem 1rem", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem", transition: "all 0.2s" }}
@@ -1017,7 +1059,8 @@ export default function App() {
   }
 
   const profile = profiles.find(p => p.id === activeProfile);
-  const T = THEMES[profile?.theme] || THEMES.beautyandthebeast;
+  // Theme Safety Net
+  const T = (profile?.theme && THEMES[profile.theme]) ? THEMES[profile.theme] : THEMES.beautyandthebeast;
 
   const mainTabs = [
     { key: "watch",   label: "🎬 Watch" },
