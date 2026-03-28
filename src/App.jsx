@@ -1018,7 +1018,24 @@ export default function App() {
   }
 
   const profile = profiles.find(p => p.id === activeProfile);
-  const T = THEMES[profile.theme || "beautyandthebeast"];
+
+{profiles.map(u => {
+  // Use the safety net: if u.theme is missing or wrong, default to beautyandthebeast
+  const T = THEMES[u?.theme] || THEMES.beautyandthebeast;
+  return (
+    <div key={u.id} style={{ position: "relative" }}>
+      <button onClick={() => onSelect(u.id)} style={{ width: 130, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "1.5rem 1rem", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem", transition: "all 0.2s" }}
+        onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
+        onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.transform = "translateY(0)"; }}
+      >
+        <div style={{ width: 54, height: 54, borderRadius: "50%", background: T.bgHeader, border: `2px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{u.avatar}</div>
+        <div style={{ color: "#E0D4FF", fontSize: "0.88rem" }}>{u.name}</div>
+        <div style={{ color: "#8888BB", fontSize: "0.62rem", letterSpacing: "0.08em" }}>{T.emoji} {T.name.split(" ").slice(0,2).join(" ")}</div>
+      </button>
+      {/* ... rest of your profile buttons ... */}
+    </div>
+  );
+})}
 
   const mainTabs = [
     { key: "watch",   label: "🎬 Watch" },
