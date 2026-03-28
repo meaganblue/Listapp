@@ -1035,7 +1035,7 @@ export default function App() {
       {/* ... rest of your profile buttons ... */}
     </div>
   );
-})}
+)
 
   const mainTabs = [
     { key: "watch",   label: "🎬 Watch" },
