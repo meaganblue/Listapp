@@ -985,4 +985,15 @@ export default function App() {
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
   );
-}
+}  const updateDesc = (id, newDesc) => {
+    // This handles the description updates
+    setItems(items.map(item => item.id === id ? { ...item, description: newDesc } : item));
+  };
+
+  return (
+    // ... existing return code ...
+  );
+};
+
+export default App;
+
