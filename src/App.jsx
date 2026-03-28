@@ -566,7 +566,7 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
       {open && (
         <div style={{ paddingLeft: "0.4rem" }}>
           {sectionDef.genres.map(g => (
-            <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} />
+            <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={onDescUpdate} theme={T} />
           ))}
         </div>
       )}
@@ -590,7 +590,7 @@ function ArchiveSection({ items, onCycle, onRateRequest, onRemove, onEdit, onDes
 }
 
 // ─────────────────────────────────────────────
-// ADD FORM with autocomplete
+// ADD FORM
 // ─────────────────────────────────────────────
 function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
   const [title, setTitle]           = useState("");
@@ -807,7 +807,6 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
             padding: "0.3rem 0.9rem", fontSize: "0.77rem", fontFamily: T.font, cursor: "pointer", transition: "all 0.15s",
           }}>{t.label}{t.count > 0 && <span style={{ opacity: 0.7 }}> ({t.count})</span>}</button>
         ))}
-        {/* Download button */}
         <div style={{ marginLeft: "auto", position: "relative" }}>
           <button onClick={() => setShowDownload(s => !s)} style={{ background: T.sectionBg, border: `1px solid ${T.border}`, borderRadius: 20, color: T.textMuted, padding: "0.3rem 0.75rem", fontSize: "0.72rem", fontFamily: T.font, cursor: "pointer" }}>
             ⬇ Export
@@ -884,8 +883,8 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
       <div style={{ color: "#8888BB", fontSize: "0.78rem", marginBottom: "3rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>Who's watching?</div>
 
       <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "2.5rem" }}>
-        const T = THEMES[u?.theme] || THEMES.beautyandthebeast;
-
+        {profiles.map(u => {
+          const T = THEMES[u?.theme] || THEMES.beautyandthebeast;
           return (
             <div key={u.id} style={{ position: "relative" }}>
               <button onClick={() => onSelect(u.id)} style={{ width: 130, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "1.5rem 1rem", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem", transition: "all 0.2s" }}
@@ -1018,24 +1017,7 @@ export default function App() {
   }
 
   const profile = profiles.find(p => p.id === activeProfile);
-
-{profiles.map(u => {
-  // Use the safety net: if u.theme is missing or wrong, default to beautyandthebeast
-  const T = THEMES[u?.theme] || THEMES.beautyandthebeast;
-  return (
-    <div key={u.id} style={{ position: "relative" }}>
-      <button onClick={() => onSelect(u.id)} style={{ width: 130, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "1.5rem 1rem", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem", transition: "all 0.2s" }}
-        onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
-        onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.transform = "translateY(0)"; }}
-      >
-        <div style={{ width: 54, height: 54, borderRadius: "50%", background: T.bgHeader, border: `2px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{u.avatar}</div>
-        <div style={{ color: "#E0D4FF", fontSize: "0.88rem" }}>{u.name}</div>
-        <div style={{ color: "#8888BB", fontSize: "0.62rem", letterSpacing: "0.08em" }}>{T.emoji} {T.name.split(" ").slice(0,2).join(" ")}</div>
-      </button>
-      {/* ... rest of your profile buttons ... */}
-    </div>
-  );
-)
+  const T = THEMES[profile?.theme] || THEMES.beautyandthebeast;
 
   const mainTabs = [
     { key: "watch",   label: "🎬 Watch" },
