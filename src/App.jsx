@@ -75,7 +75,6 @@ const READ_SECTIONS = {
 const AVATAR_EMOJIS = ["🦊","🐺","🌙","🌿","🐙","🦋","🔮","🌊","🎭","🚀","☕","🎸"];
 const RATING_LABELS = ["","Hated it","Didn't like it","It was okay","Liked it","Loved it"];
 const RATING_EMOJIS_MAP = ["","😤","😕","😐","🙂","😍"];
-const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_KEY;
 
 // ─────────────────────────────────────────────
 // SUPABASE DATA LAYER
