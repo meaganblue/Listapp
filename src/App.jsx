@@ -176,4 +176,7 @@ export default function App() {
             </div>
             {/* Switch / Logout buttons logic */}
             <div style={{ position: "relative" }}>
-              <button onClick={() => setShowSwitch(s => !s)} style={{ background
+          <button 
+            onClick={() => setShowSwitch(s => !s)} 
+            style={{ background: "transparent", border: "none", cursor: "pointer" }}
+          >
