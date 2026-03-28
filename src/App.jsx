@@ -990,9 +990,14 @@ export default function App() {
     setItems(items.map(item => item.id === id ? { ...item, description: newDesc } : item));
   };
 
-  return (
-    // ... existing return code ...
+    return (
+    <div className="min-h-screen bg-slate-950 text-white p-4">
+      {/* Your list UI code goes here */}
+    </div>
   );
+};
+
+export default App;
 };
 
 export default App;
