@@ -985,14 +985,57 @@ export default function App() {
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
   );
-}  const updateDesc = (id, newDesc) => {
-    // This handles the description updates
+  const updateDesc = (id, newDesc) => {
     setItems(items.map(item => item.id === id ? { ...item, description: newDesc } : item));
   };
 
-    return (
+  return (
     <div className="min-h-screen bg-slate-950 text-white p-4">
-      {/* Your list UI code goes here */}
+      {  return (
+    <div className="min-h-screen bg-slate-950 text-white p-4 pb-20 font-sans">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          🦊 Meagan's Lists
+        </h1>
+        <button 
+          onClick={() => setShowSwitch(s => !s)}
+          className="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full text-sm"
+        >
+          <RefreshCw size={14} /> Switch
+        </button>
+      </div>
+
+      {/* Main Tabs */}
+      <div className="flex gap-2 mb-6 bg-slate-900/50 p-1 rounded-xl">
+        {['watch', 'read', 'for-you'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 py-2 rounded-lg capitalize flex items-center justify-center gap-2 ${
+              activeTab === tab ? 'bg-pink-600 text-white' : 'text-slate-400'
+            }`}
+          >
+            {tab === 'watch' && <Film size={18} />}
+            {tab === 'read' && <Book size={18} />}
+            {tab === 'for-you' && <Sparkles size={18} />}
+            {tab.replace('-', ' ')}
+          </button>
+        ))}
+      </div>
+
+      {/* Your List Items would be mapped here */}
+      <div className="space-y-4">
+        {items.filter(item => item.tab === activeTab).map(item => (
+          <div key={item.id} className="bg-slate-900 p-4 rounded-xl border border-slate-800">
+            <h3 className="font-semibold">{item.title}</h3>
+            <p className="text-sm text-slate-400">{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
     </div>
   );
 };
