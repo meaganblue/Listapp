@@ -203,14 +203,12 @@ function AuthPage({ onAuth }) {
     const email = fakeEmail(username.trim());
 
     if (mode === "signup") {
-      // Check username not taken by trying to sign in first
       const { data: existing } = await supabase.from("accounts").select("id").eq("username", username.trim().toLowerCase()).maybeSingle();
       if (existing) { setError("That username is already taken."); setLoading(false); return; }
 
       const { data, error: err } = await supabase.auth.signUp({ email, password });
       if (err) { setError(err.message); setLoading(false); return; }
 
-      // Store username mapping
       await supabase.from("accounts").insert({ id: data.user.id, username: username.trim().toLowerCase() });
       onAuth(data.user, username.trim());
     } else {
@@ -325,7 +323,6 @@ function EditModal({ item, sections, onSave, onClose, theme: T }) {
         <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.12em", color: T.textMuted, marginBottom: "0.3rem" }}>Edit entry</div>
         <div style={{ fontSize: "1rem", color: T.text, fontFamily: T.headerFont, marginBottom: "1.2rem", lineHeight: 1.3 }}>{item.title}</div>
 
-        {/* Section */}
         <div style={{ marginBottom: "1rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>Section</label>
           <select value={section} onChange={e => { setSection(e.target.value); setSelectedGenres(["Other"]); }}
@@ -334,7 +331,6 @@ function EditModal({ item, sections, onSave, onClose, theme: T }) {
           </select>
         </div>
 
-        {/* Genres — multi select */}
         <div style={{ marginBottom: "1rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>
             Genres <span style={{ color: T.textFaint, textTransform: "none", letterSpacing: 0 }}>(up to 3)</span>
@@ -351,7 +347,6 @@ function EditModal({ item, sections, onSave, onClose, theme: T }) {
           </div>
         </div>
 
-        {/* Notes */}
         <div style={{ marginBottom: "1.3rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>Notes</label>
           <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes…"
@@ -396,7 +391,6 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
   return (
     <div style={{ background: T.bgCard, border: `1px solid ${done ? T.borderLight : T.border}`, borderRadius: 8, marginBottom: "0.35rem", overflow: "hidden", opacity: done ? 0.68 : 1, transition: "opacity 0.2s" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", padding: "0.65rem 0.85rem" }}>
-        {/* Status dot */}
         <button onClick={() => !isArchive && onCycle(item.id)}
           style={{ width: 18, height: 18, borderRadius: "50%", flexShrink: 0, border: "none", cursor: isArchive ? "default" : "pointer",
             background: done ? T.accent : wip ? T.textMid : T.borderLight,
@@ -405,7 +399,6 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
           onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
         >{done ? "✓" : wip ? "▶" : ""}</button>
 
-        {/* Title + genre pills */}
         <button onClick={handleExpand} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0, minWidth: 0 }}>
           <div style={{ fontSize: "0.88rem", color: done ? T.textMuted : T.text, textDecoration: done ? "line-through" : "none", fontFamily: T.font, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {item.title}
@@ -419,7 +412,6 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
           )}
         </button>
 
-        {/* Rating */}
         {done && item.rating > 0 && (
           <span style={{ fontSize: "0.7rem", color: T.accent, letterSpacing: 1, flexShrink: 0 }}>{"★".repeat(item.rating)}</span>
         )}
@@ -427,14 +419,12 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
           <button onClick={() => onRateRequest(item)} style={{ background: "transparent", border: `1px solid ${T.borderLight}`, borderRadius: 4, color: T.textMuted, padding: "0.13rem 0.45rem", fontSize: "0.65rem", fontFamily: T.font, cursor: "pointer", flexShrink: 0 }}>Rate</button>
         )}
 
-        {/* Edit */}
         <button onClick={() => onEdit(item)} style={{ background: "transparent", border: "none", color: T.textFaint, cursor: "pointer", fontSize: "0.8rem", flexShrink: 0, lineHeight: 1, padding: "0 0.1rem", transition: "color 0.15s" }}
           onMouseEnter={e => e.currentTarget.style.color = T.accent}
           onMouseLeave={e => e.currentTarget.style.color = T.textFaint}
           title="Edit"
         >✎</button>
 
-        {/* Remove */}
         <button onClick={() => onRemove(item.id)} style={{ background: "transparent", border: "none", color: T.borderLight, cursor: "pointer", fontSize: "0.95rem", flexShrink: 0, lineHeight: 1, padding: "0 0.1rem", transition: "color 0.15s" }}
           onMouseEnter={e => e.currentTarget.style.color = T.danger}
           onMouseLeave={e => e.currentTarget.style.color = T.borderLight}
@@ -496,7 +486,6 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
   sectionDef.genres.forEach(g => { byGenre[g] = []; });
   filtered.forEach(i => {
     const itemGenres = i.genres?.length ? i.genres : i.genre ? [i.genre] : ["Other"];
-    // Place item under its first/primary genre
     const primaryGenre = itemGenres[0] || "Other";
     if (!byGenre[primaryGenre]) byGenre[primaryGenre] = [];
     byGenre[primaryGenre].push(i);
@@ -513,7 +502,7 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
       {open && (
         <div style={{ paddingLeft: "0.4rem" }}>
           {sectionDef.genres.map(g => (
-            <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} />
+            <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={updateDesc} theme={T} />
           ))}
         </div>
       )}
@@ -640,13 +629,18 @@ function ListPage({ userId, listType, sections, theme: T }) {
 
   const cycleStatus = useCallback(async (id) => {
     const order = [todoStatus, wipStatus, doneStatus];
+    let updatedItem = null;
+
     setItems(prev => prev.map(item => {
       if (item.id !== id) return item;
       const next = order[(order.indexOf(item.status) + 1) % order.length];
-      const updated = { ...item, status: next };
-      dbUpdateItem(userId, updated, listType);
-      return updated;
+      updatedItem = { ...item, status: next };
+      return updatedItem;
     }));
+
+    if (updatedItem) {
+      await dbUpdateItem(userId, updatedItem, listType);
+    }
   }, [userId, listType, todoStatus, wipStatus, doneStatus]);
 
   const removeItem = useCallback(async (id) => {
@@ -663,30 +657,39 @@ function ListPage({ userId, listType, sections, theme: T }) {
   };
 
   const rateItem = useCallback(async (id, rating) => {
+    let updatedItem = null;
     setItems(prev => prev.map(i => {
       if (i.id !== id) return i;
-      const updated = { ...i, rating };
-      dbUpdateItem(userId, updated, listType);
-      return updated;
+      updatedItem = { ...i, rating };
+      return updatedItem;
     }));
+    if (updatedItem) {
+      await dbUpdateItem(userId, updatedItem, listType);
+    }
   }, [userId, listType]);
 
   const saveEdit = useCallback(async (id, changes) => {
+    let updatedItem = null;
     setItems(prev => prev.map(i => {
       if (i.id !== id) return i;
-      const updated = { ...i, ...changes };
-      dbUpdateItem(userId, updated, listType);
-      return updated;
+      updatedItem = { ...i, ...changes };
+      return updatedItem;
     }));
+    if (updatedItem) {
+      await dbUpdateItem(userId, updatedItem, listType);
+    }
   }, [userId, listType]);
 
   const updateDesc = useCallback(async (id, desc) => {
+    let updatedItem = null;
     setItems(prev => prev.map(i => {
       if (i.id !== id) return i;
-      const updated = { ...i, desc };
-      dbUpdateItem(userId, updated, listType);
-      return updated;
+      updatedItem = { ...i, desc };
+      return updatedItem;
     }));
+    if (updatedItem) {
+      await dbUpdateItem(userId, updatedItem, listType);
+    }
   }, [userId, listType]);
 
   const wipItems  = items.filter(i => i.status === wipStatus);
@@ -837,14 +840,13 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
 // ROOT APP
 // ─────────────────────────────────────────────
 export default function App() {
-  const [authUser, setAuthUser]       = useState(undefined); // undefined = loading
+  const [authUser, setAuthUser]       = useState(undefined); 
   const [username, setUsername]       = useState("");
   const [profiles, setProfiles]       = useState([]);
   const [activeProfile, setActiveProfile] = useState(null);
   const [mainTab, setMainTab]         = useState("watch");
   const [showSwitch, setShowSwitch]   = useState(false);
 
-  // Check existing session on load
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -861,7 +863,6 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load profiles when auth user is set
   useEffect(() => {
     if (!authUser) return;
     dbGetProfiles(authUser.id).then(setProfiles);
@@ -872,17 +873,14 @@ export default function App() {
     setAuthUser(null); setUsername(""); setProfiles([]); setActiveProfile(null);
   };
 
-  // Loading state
   if (authUser === undefined) return (
     <div style={{ minHeight: "100vh", background: "#1a1a2e", display: "flex", alignItems: "center", justifyContent: "center", color: "#8888BB", fontFamily: "Georgia, serif" }}>Loading…</div>
   );
 
-  // Not logged in
   if (!authUser) return (
     <AuthPage onAuth={(user, uname) => { setAuthUser(user); setUsername(uname); }} />
   );
 
-  // Logged in but no profile selected
   if (!activeProfile || !profiles.find(p => p.id === activeProfile)) {
     return (
       <ProfileSelectPage
@@ -926,7 +924,6 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, color: T.text }}>
-      {/* Header */}
       <div style={{ background: T.bgHeader, borderBottom: `1px solid ${T.border}`, padding: "1.1rem 1.5rem 0", position: "sticky", top: 0, zIndex: 20 }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.9rem" }}>
