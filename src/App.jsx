@@ -62,9 +62,6 @@ const THEMES = {
   },
 };
 
-// ─────────────────────────────────────────────
-// TAXONOMIES
-// ─────────────────────────────────────────────
 const WATCH_SECTIONS = {
   Movies:        { icon: "🎬", genres: ["Horror","Comedy","Rom-Com","Action","Drama","Sci-Fi","Thriller","Fantasy","Family","Animation","Documentary","Other"] },
   Shows:         { icon: "📺", genres: ["Horror","Comedy","Drama","Sci-Fi","Thriller","Fantasy","Action","Reality","Anime","Family","Documentary","Other"] },
@@ -136,7 +133,7 @@ async function dbDeleteItem(userId, itemId, listType) {
 }
 
 // ─────────────────────────────────────────────
-// ANTHROPIC HELPERS (via proxy)
+// ANTHROPIC HELPERS
 // ─────────────────────────────────────────────
 async function callClaude(prompt, maxTokens = 100) {
   const resp = await fetch("/api/claude", {
@@ -176,7 +173,7 @@ Return only the JSON, no other text.`;
   }
 }
 
-async function fetchSuggestions(query, listType) {
+async function fetchTitleSuggestions(query, listType) {
   if (!query || query.length < 2) return [];
   const typeHint = listType === "watch" ? "films, TV shows, and documentaries" : "books";
   const prompt = `List 6 real ${typeHint} whose titles start with or closely match "${query}". Return ONLY a JSON array of objects with keys "title" and "year". Example: [{"title":"The Matrix","year":"1999"}]. No other text.`;
@@ -184,9 +181,7 @@ async function fetchSuggestions(query, listType) {
     const raw = await callClaude(prompt, 200);
     const cleaned = raw.replace(/```json|```/g, "").trim();
     return JSON.parse(cleaned);
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
 async function generateSuggestions(watchItems, readItems) {
@@ -194,13 +189,8 @@ async function generateSuggestions(watchItems, readItems) {
   if (rated.length === 0) return "Rate items 4–5 ★ after watching or reading to unlock personalised suggestions.";
   const liked = rated.map(i => `"${i.title}"`).slice(0, 10).join(", ");
   try {
-    return await callClaude(
-      `User loved: ${liked}. Suggest 5 films/shows AND 3 books they'd enjoy. For each: title + one sentence why. Be specific.`,
-      600
-    );
-  } catch {
-    return "Could not reach suggestions service.";
-  }
+    return await callClaude(`User loved: ${liked}. Suggest 5 films/shows AND 3 books they'd enjoy. For each: title + one sentence why. Be specific.`, 600);
+  } catch { return "Could not reach suggestions service."; }
 }
 
 // ─────────────────────────────────────────────
@@ -227,10 +217,7 @@ function downloadCSV(items, listType, profileName) {
 function downloadTXT(items, listType, profileName) {
   const lines = [`${profileName}'s ${listType === "watch" ? "Watch" : "Read"} List`, "=".repeat(40), ""];
   const bySection = {};
-  items.forEach(i => {
-    if (!bySection[i.section]) bySection[i.section] = [];
-    bySection[i.section].push(i);
-  });
+  items.forEach(i => { if (!bySection[i.section]) bySection[i.section] = []; bySection[i.section].push(i); });
   Object.entries(bySection).forEach(([section, sItems]) => {
     lines.push(`── ${section} ──`);
     sItems.forEach(i => {
@@ -252,6 +239,46 @@ function downloadTXT(items, listType, profileName) {
 }
 
 // ─────────────────────────────────────────────
+// USER MANUAL MODAL
+// ─────────────────────────────────────────────
+function ManualModal({ onClose }) {
+  const sections = [
+    { title: "Getting Started", content: "Create an account with a username and password — no email needed. Once in, create up to 4 profiles (great for households or different moods). Each profile has its own separate watch and read lists." },
+    { title: "Adding Titles", content: "Tap '+ Add title' or '+ Add book'. Start typing and the app will suggest matching titles. Select one or type your own. The AI will automatically detect the section (Movies, Shows, Fiction, etc.) and genre tags. You can always edit these after." },
+    { title: "Tracking Progress", content: "Each entry has a status dot on the left. Tap it to cycle through: To Watch → Watching → Watched (or To Read → Reading → Read). Items in progress appear in the Watching/Reading tab. Finished items move to the Watched/Read tab." },
+    { title: "Ratings", content: "Once something is marked as Watched or Read, a Rate button appears. Tap it to give a score from 1 (Hated it) to 5 (Loved it). Ratings power the personalised suggestions in the ✨ For You tab." },
+    { title: "Editing Entries", content: "Tap the ✎ pencil icon on any entry to edit its section, genre tags (up to 3), notes, and author (for books). Changes save instantly." },
+    { title: "Descriptions", content: "Tap any title to expand it and see a short AI-generated description. This fetches automatically the first time you expand an entry." },
+    { title: "Suggestions", content: "Head to the ✨ For You tab and tap Generate Suggestions. The AI looks at everything you've rated 4–5 stars and recommends films, shows, and books you might love. Rate more items for better results." },
+    { title: "Exporting Your List", content: "Tap the ⬇ Export button at the top of any list to download it as a CSV (opens in Excel or Google Sheets) or a plain text file." },
+    { title: "Themes", content: "Each profile can have its own colour theme. From the profile selection screen, tap 🎨 under any profile to choose from Beauty and the Beast, Toy Story, Gilmore Girls, The Muppet Show, or Agatha All Along." },
+    { title: "Switching Profiles", content: "Tap the ⇄ Switch button in the top right while using the app to jump between profiles or manage them. You can also log out from there." },
+  ];
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
+      <div style={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 16, width: "100%", maxWidth: 480, maxHeight: "88vh", display: "flex", flexDirection: "column", fontFamily: "Georgia, serif" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.2rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+          <div>
+            <div style={{ color: "#E0D4FF", fontSize: "1.1rem", fontWeight: "bold" }}>✦ How to use Lists</div>
+            <div style={{ color: "#8888BB", fontSize: "0.72rem", marginTop: "0.2rem" }}>Your complete guide</div>
+          </div>
+          <button onClick={onClose} style={{ background: "transparent", border: "none", color: "#8888BB", fontSize: "1.3rem", cursor: "pointer", lineHeight: 1 }}>×</button>
+        </div>
+        <div style={{ overflowY: "auto", padding: "1rem 1.5rem 1.5rem" }}>
+          {sections.map((s, i) => (
+            <div key={i} style={{ marginBottom: "1.2rem" }}>
+              <div style={{ color: "#C9B8FF", fontSize: "0.78rem", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.35rem" }}>{s.title}</div>
+              <div style={{ color: "#B0A0CC", fontSize: "0.85rem", lineHeight: 1.6 }}>{s.content}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // AUTH PAGE
 // ─────────────────────────────────────────────
 function AuthPage({ onAuth }) {
@@ -260,6 +287,7 @@ function AuthPage({ onAuth }) {
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
+  const [showManual, setShowManual] = useState(false);
   const fakeEmail = (u) => `${u.toLowerCase().replace(/[^a-z0-9]/g, "")}@lists.app`;
 
   const handle = async () => {
@@ -290,10 +318,24 @@ function AuthPage({ onAuth }) {
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Georgia, serif" }}>
-      <div style={{ color: "#E0D4FF", fontSize: "2rem", marginBottom: "0.3rem", letterSpacing: "0.08em" }}>✦ Lists</div>
-      <div style={{ color: "#8888BB", fontSize: "0.78rem", marginBottom: "2.5rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+      {showManual && <ManualModal onClose={() => setShowManual(false)} />}
+
+      <div style={{ color: "#E0D4FF", fontSize: "2.2rem", marginBottom: "0.3rem", letterSpacing: "0.08em" }}>✦ Lists</div>
+
+      {/* App blurb */}
+      <div style={{ maxWidth: 320, textAlign: "center", marginBottom: "2rem" }}>
+        <div style={{ color: "#9988CC", fontSize: "0.82rem", lineHeight: 1.6 }}>
+          Your personal watch list and reading tracker. Add films, shows, books and more — organised by genre, tracked as you go, rated when you're done. Create up to 4 profiles per account to share with your household.
+        </div>
+        <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: "none", color: "#6677BB", fontSize: "0.75rem", cursor: "pointer", textDecoration: "underline", marginTop: "0.5rem" }}>
+          How does it work? →
+        </button>
+      </div>
+
+      <div style={{ color: "#8888BB", fontSize: "0.75rem", marginBottom: "1.5rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>
         {mode === "login" ? "Welcome back" : "Create account"}
       </div>
+
       <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "0.85rem" }}>
         <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username"
           onKeyDown={e => e.key === "Enter" && handle()} style={inp} autoCapitalize="none" autoCorrect="off" />
@@ -307,6 +349,10 @@ function AuthPage({ onAuth }) {
           style={{ background: "transparent", border: "none", color: "#8888BB", fontSize: "0.82rem", fontFamily: "Georgia, serif", cursor: "pointer", textDecoration: "underline" }}>
           {mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
         </button>
+      </div>
+
+      <div style={{ color: "#444466", fontSize: "0.68rem", marginTop: "2.5rem", textAlign: "center" }}>
+        No email required. Your username and password are all you need.
       </div>
     </div>
   );
@@ -375,7 +421,6 @@ function EditModal({ item, sections, onSave, onClose, theme: T, listType }) {
       <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 14, padding: "1.5rem", maxWidth: 400, width: "100%", fontFamily: T.font, maxHeight: "85vh", overflowY: "auto" }}>
         <div style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.12em", color: T.textMuted, marginBottom: "0.3rem" }}>Edit entry</div>
         <div style={{ fontSize: "1rem", color: T.text, fontFamily: T.headerFont, marginBottom: "1.2rem", lineHeight: 1.3 }}>{item.title}</div>
-
         {listType === "read" && (
           <div style={{ marginBottom: "1rem" }}>
             <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>Author</label>
@@ -383,7 +428,6 @@ function EditModal({ item, sections, onSave, onClose, theme: T, listType }) {
               style={{ width: "100%", background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.4rem 0.6rem", fontSize: "0.85rem", fontFamily: T.font, outline: "none", boxSizing: "border-box" }} />
           </div>
         )}
-
         <div style={{ marginBottom: "1rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>Section</label>
           <select value={section} onChange={e => { setSection(e.target.value); setSelectedGenres(["Other"]); }}
@@ -391,7 +435,6 @@ function EditModal({ item, sections, onSave, onClose, theme: T, listType }) {
             {sectionKeys.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-
         <div style={{ marginBottom: "1rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>
             Genres <span style={{ color: T.textFaint, textTransform: "none", letterSpacing: 0 }}>(up to 3)</span>
@@ -407,13 +450,11 @@ function EditModal({ item, sections, onSave, onClose, theme: T, listType }) {
             ))}
           </div>
         </div>
-
         <div style={{ marginBottom: "1.3rem" }}>
           <label style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", color: T.textMuted, display: "block", marginBottom: "0.4rem" }}>Notes</label>
           <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes…"
             style={{ width: "100%", background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.4rem 0.6rem", fontSize: "0.85rem", fontFamily: T.font, outline: "none", boxSizing: "border-box" }} />
         </div>
-
         <div style={{ display: "flex", gap: "0.6rem", justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 6, color: T.textMuted, padding: "0.4rem 1rem", fontSize: "0.82rem", fontFamily: T.font, cursor: "pointer" }}>Cancel</button>
           <button onClick={() => { onSave({ section, genres: selectedGenres, genre: selectedGenres[0], notes, author }); onClose(); }}
@@ -482,13 +523,11 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
         {done && item.rating === 0 && (
           <button onClick={() => onRateRequest(item)} style={{ background: "transparent", border: `1px solid ${T.borderLight}`, borderRadius: 4, color: T.textMuted, padding: "0.13rem 0.45rem", fontSize: "0.65rem", fontFamily: T.font, cursor: "pointer", flexShrink: 0 }}>Rate</button>
         )}
-
         <button onClick={() => onEdit(item)} style={{ background: "transparent", border: "none", color: T.textFaint, cursor: "pointer", fontSize: "0.8rem", flexShrink: 0, lineHeight: 1, padding: "0 0.1rem", transition: "color 0.15s" }}
           onMouseEnter={e => e.currentTarget.style.color = T.accent}
           onMouseLeave={e => e.currentTarget.style.color = T.textFaint}
           title="Edit"
         >✎</button>
-
         <button onClick={() => onRemove(item.id)} style={{ background: "transparent", border: "none", color: T.borderLight, cursor: "pointer", fontSize: "0.95rem", flexShrink: 0, lineHeight: 1, padding: "0 0.1rem", transition: "color 0.15s" }}
           onMouseEnter={e => e.currentTarget.style.color = T.danger}
           onMouseLeave={e => e.currentTarget.style.color = T.borderLight}
@@ -566,17 +605,7 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
       {open && (
         <div style={{ paddingLeft: "0.4rem" }}>
           {sectionDef.genres.map(g => (
-            <GenreSection 
-              key={g} 
-              genre={g} 
-              items={byGenre[g] || []} 
-              onCycle={onCycle} 
-              onRemove={onRemove} 
-              onRateRequest={onRateRequest} 
-              onEdit={onEdit} 
-              onDescUpdate={onDescUpdate} 
-              theme={T} 
-            />
+            <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} />
           ))}
         </div>
       )}
@@ -600,14 +629,14 @@ function ArchiveSection({ items, onCycle, onRateRequest, onRemove, onEdit, onDes
 }
 
 // ─────────────────────────────────────────────
-// ADD FORM
+// ADD FORM with autocomplete
 // ─────────────────────────────────────────────
 function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
-  const [title, setTitle]           = useState("");
-  const [author, setAuthor]         = useState("");
-  const [detecting, setDetecting]   = useState(false);
+  const [title, setTitle]             = useState("");
+  const [author, setAuthor]           = useState("");
+  const [detecting, setDetecting]     = useState(false);
   const [suggestions, setSuggestions] = useState([]);
-  const [showSugg, setShowSugg]     = useState(false);
+  const [showSugg, setShowSugg]       = useState(false);
   const [loadingSugg, setLoadingSugg] = useState(false);
   const inputRef = useRef(null);
   const suggTimer = useRef(null);
@@ -621,7 +650,7 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
     if (val.length < 2) { setSuggestions([]); return; }
     setLoadingSugg(true);
     suggTimer.current = setTimeout(async () => {
-      const results = await fetchSuggestions(val, listType);
+      const results = await fetchTitleSuggestions(val, listType);
       setSuggestions(results);
       setLoadingSugg(false);
     }, 600);
@@ -665,13 +694,11 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
           </div>
         )}
       </div>
-
       {listType === "read" && (
         <input value={author} onChange={e => setAuthor(e.target.value)} placeholder="Author (optional)"
           style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${T.borderLight}`, color: T.text, padding: "0.3rem 0", fontSize: "0.88rem", fontFamily: T.font, outline: "none", marginBottom: "0.75rem", boxSizing: "border-box", fontStyle: "italic" }}
         />
       )}
-
       {detecting && <div style={{ fontSize: "0.75rem", color: T.textMuted, marginBottom: "0.5rem" }}>✨ Auto-detecting genre…</div>}
       <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", marginTop: "0.75rem" }}>
         <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, color: T.textMuted, padding: "0.3rem 0.85rem", fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer" }}>Cancel</button>
@@ -737,12 +764,12 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
   const wipStatus  = listType === "watch" ? "watching"  : "reading";
   const doneStatus = listType === "watch" ? "watched"   : "read";
 
-  const [items, setItems]           = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [subTab, setSubTab]         = useState("list");
-  const [search, setSearch]         = useState("");
-  const [adding, setAdding]         = useState(false);
-  const [ratingItem, setRatingItem] = useState(null);
+  const [items, setItems]             = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [subTab, setSubTab]           = useState("list");
+  const [search, setSearch]           = useState("");
+  const [adding, setAdding]           = useState(false);
+  const [ratingItem, setRatingItem]   = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [showDownload, setShowDownload] = useState(false);
 
@@ -856,49 +883,18 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
             <div style={{ color: T.textFaint, textAlign: "center", padding: "3rem 0", fontSize: "0.85rem" }}>Nothing here yet. Add something!</div>
           )}
           {Object.entries(sections).map(([key, def]) => (
-            <MainSection 
-              key={key} 
-              sectionKey={key} 
-              sectionDef={def} 
-              items={items} 
-              onCycle={cycleStatus} 
-              onRemove={removeItem} 
-              onRateRequest={setRatingItem} 
-              onEdit={setEditingItem} 
-              onDescUpdate={updateDesc} 
-              theme={T} 
-              search={search} 
-              listType={listType} 
-            />
+            <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} listType={listType} />
           ))}
         </>
       )}
 
       {subTab === "wip" && (
-        <ArchiveSection 
-          items={wipItems} 
-          onCycle={cycleStatus} 
-          onRateRequest={setRatingItem} 
-          onRemove={removeItem} 
-          onEdit={setEditingItem} 
-          onDescUpdate={updateDesc} 
-          theme={T}
-          title={listType === "watch" ? "Currently watching" : "Currently reading"} 
-          emptyMsg="Nothing in progress." 
-          canCycle={true} 
-        />
+        <ArchiveSection items={wipItems} onCycle={cycleStatus} onRateRequest={setRatingItem} onRemove={removeItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T}
+          title={listType === "watch" ? "Currently watching" : "Currently reading"} emptyMsg="Nothing in progress." canCycle={true} />
       )}
       {subTab === "done" && (
-        <ArchiveSection 
-          items={doneItems} 
-          onRateRequest={setRatingItem} 
-          onRemove={removeItem} 
-          onEdit={setEditingItem} 
-          onDescUpdate={updateDesc} 
-          theme={T}
-          title={listType === "watch" ? "Finished" : "Finished reading"} 
-          emptyMsg="Nothing finished yet." 
-        />
+        <ArchiveSection items={doneItems} onRateRequest={setRatingItem} onRemove={removeItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T}
+          title={listType === "watch" ? "Finished" : "Finished reading"} emptyMsg="Nothing finished yet." />
       )}
 
       {ratingItem && <RatingModal item={ratingItem} onRate={r => rateItem(ratingItem.id, r)} onClose={() => setRatingItem(null)} theme={T} />}
@@ -915,18 +911,19 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
   const [newName, setNewName]             = useState("");
   const [addingProfile, setAddingProfile] = useState(false);
   const [editingTheme, setEditingTheme]   = useState(null);
+  const [showManual, setShowManual]       = useState(false);
   const inputRef = useRef(null);
   useEffect(() => { if (addingProfile) inputRef.current?.focus(); }, [addingProfile]);
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Georgia, serif" }}>
+      {showManual && <ManualModal onClose={() => setShowManual(false)} />}
       <div style={{ color: "#E0D4FF", fontSize: "2rem", marginBottom: "0.3rem", letterSpacing: "0.08em" }}>✦ Lists</div>
       <div style={{ color: "#8888BB", fontSize: "0.78rem", marginBottom: "3rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>Who's watching?</div>
 
       <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "2.5rem" }}>
         {profiles.map(u => {
-          // Robust theme safety net
-          const T = (u?.theme && THEMES[u.theme]) ? THEMES[u.theme] : THEMES.beautyandthebeast;
+          const T = THEMES[u.theme] || THEMES.beautyandthebeast;
           return (
             <div key={u.id} style={{ position: "relative" }}>
               <button onClick={() => onSelect(u.id)} style={{ width: 130, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "1.5rem 1rem", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem", transition: "all 0.2s" }}
@@ -983,9 +980,14 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
         )}
       </div>
 
-      <button onClick={onLogout} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: "#6666AA", padding: "0.4rem 1.2rem", fontSize: "0.78rem", fontFamily: "Georgia, serif", cursor: "pointer" }}>
-        Log out
-      </button>
+      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+        <button onClick={onLogout} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: "#6666AA", padding: "0.4rem 1.2rem", fontSize: "0.78rem", fontFamily: "Georgia, serif", cursor: "pointer" }}>
+          Log out
+        </button>
+        <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: "none", color: "#6677BB", fontSize: "0.75rem", fontFamily: "Georgia, serif", cursor: "pointer", textDecoration: "underline" }}>
+          Help / Manual
+        </button>
+      </div>
     </div>
   );
 }
@@ -999,6 +1001,7 @@ export default function App() {
   const [activeProfile, setActiveProfile] = useState(null);
   const [mainTab, setMainTab]             = useState("watch");
   const [showSwitch, setShowSwitch]       = useState(false);
+  const [showManual, setShowManual]       = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -1059,8 +1062,7 @@ export default function App() {
   }
 
   const profile = profiles.find(p => p.id === activeProfile);
-  // Theme Safety Net
-  const T = (profile?.theme && THEMES[profile.theme]) ? THEMES[profile.theme] : THEMES.beautyandthebeast;
+  const T = THEMES[profile.theme] || THEMES.beautyandthebeast;
 
   const mainTabs = [
     { key: "watch",   label: "🎬 Watch" },
@@ -1070,6 +1072,8 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, color: T.text }}>
+      {showManual && <ManualModal onClose={() => setShowManual(false)} />}
+
       <div style={{ background: T.bgHeader, borderBottom: `1px solid ${T.border}`, padding: "1.1rem 1.5rem 0", position: "sticky", top: 0, zIndex: 20 }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.9rem" }}>
@@ -1077,30 +1081,33 @@ export default function App() {
               <span style={{ fontSize: "1.2rem" }}>{profile.avatar}</span>
               <span style={{ fontSize: "0.95rem", fontFamily: T.headerFont, color: "#fff", fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
             </div>
-            <div style={{ position: "relative" }}>
-              <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "0.28rem 0.75rem", fontSize: "0.73rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                <span>⇄</span><span>Switch</span>
-              </button>
-              {showSwitch && (
-                <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.5rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0.5rem", zIndex: 100, minWidth: 160, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
-                  {profiles.map(p => (
-                    <button key={p.id} onClick={() => { setActiveProfile(p.id); setShowSwitch(false); setMainTab("watch"); }}
-                      style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: p.id === activeProfile ? T.sectionBg : "transparent", border: "none", borderRadius: 6, padding: "0.42rem 0.6rem", cursor: "pointer", color: T.text, fontSize: "0.82rem", fontFamily: T.font, marginBottom: "0.12rem" }}>
-                      <span>{p.avatar}</span><span>{p.name}</span>
-                    </button>
-                  ))}
-                  <div style={{ borderTop: `1px solid ${T.borderLight}`, marginTop: "0.3rem", paddingTop: "0.3rem" }}>
-                    <button onClick={() => { setActiveProfile(null); setShowSwitch(false); }}
-                      style={{ width: "100%", background: "transparent", border: "none", borderRadius: 6, padding: "0.38rem 0.6rem", cursor: "pointer", color: T.textMuted, fontSize: "0.73rem", fontFamily: T.font, textAlign: "left" }}>
-                      👥 Manage profiles
-                    </button>
-                    <button onClick={() => { handleLogout(); setShowSwitch(false); }}
-                      style={{ width: "100%", background: "transparent", border: "none", borderRadius: 6, padding: "0.38rem 0.6rem", cursor: "pointer", color: T.textMuted, fontSize: "0.73rem", fontFamily: T.font, textAlign: "left" }}>
-                      🚪 Log out
-                    </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <button onClick={() => setShowManual(true)} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20, padding: "0.28rem 0.65rem", fontSize: "0.7rem", fontFamily: T.font, color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>?</button>
+              <div style={{ position: "relative" }}>
+                <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "0.28rem 0.75rem", fontSize: "0.73rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                  <span>⇄</span><span>Switch</span>
+                </button>
+                {showSwitch && (
+                  <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.5rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0.5rem", zIndex: 100, minWidth: 160, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+                    {profiles.map(p => (
+                      <button key={p.id} onClick={() => { setActiveProfile(p.id); setShowSwitch(false); setMainTab("watch"); }}
+                        style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: p.id === activeProfile ? T.sectionBg : "transparent", border: "none", borderRadius: 6, padding: "0.42rem 0.6rem", cursor: "pointer", color: T.text, fontSize: "0.82rem", fontFamily: T.font, marginBottom: "0.12rem" }}>
+                        <span>{p.avatar}</span><span>{p.name}</span>
+                      </button>
+                    ))}
+                    <div style={{ borderTop: `1px solid ${T.borderLight}`, marginTop: "0.3rem", paddingTop: "0.3rem" }}>
+                      <button onClick={() => { setActiveProfile(null); setShowSwitch(false); }}
+                        style={{ width: "100%", background: "transparent", border: "none", borderRadius: 6, padding: "0.38rem 0.6rem", cursor: "pointer", color: T.textMuted, fontSize: "0.73rem", fontFamily: T.font, textAlign: "left" }}>
+                        👥 Manage profiles
+                      </button>
+                      <button onClick={() => { handleLogout(); setShowSwitch(false); }}
+                        style={{ width: "100%", background: "transparent", border: "none", borderRadius: 6, padding: "0.38rem 0.6rem", cursor: "pointer", color: T.textMuted, fontSize: "0.73rem", fontFamily: T.font, textAlign: "left" }}>
+                        🚪 Log out
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
