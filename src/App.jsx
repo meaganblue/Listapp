@@ -629,7 +629,7 @@ function ArchiveSection({ items, onCycle, onRateRequest, onRemove, onEdit, onDes
 }
 
 // ─────────────────────────────────────────────
-// ADD FORM with autocomplete
+// ADD FORM with autocomplete & toggle
 // ─────────────────────────────────────────────
 function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
   const [title, setTitle]             = useState("");
@@ -638,6 +638,8 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSugg, setShowSugg]       = useState(false);
   const [loadingSugg, setLoadingSugg] = useState(false);
+  const [syncToOther, setSyncToOther] = useState(false);
+  
   const inputRef = useRef(null);
   const suggTimer = useRef(null);
 
@@ -667,7 +669,7 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
     setDetecting(true);
     const detected = await autoDetectGenre(title.trim(), listType);
     setDetecting(false);
-    onAdd({ title: title.trim(), author: author.trim(), ...detected });
+    onAdd({ title: title.trim(), author: author.trim(), ...detected }, syncToOther);
   };
 
   return (
@@ -699,6 +701,20 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
           style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${T.borderLight}`, color: T.text, padding: "0.3rem 0", fontSize: "0.88rem", fontFamily: T.font, outline: "none", marginBottom: "0.75rem", boxSizing: "border-box", fontStyle: "italic" }}
         />
       )}
+      
+      {/* NEW TOGGLE FEATURE */}
+      <div style={{ marginBottom: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+         <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer", fontSize: "0.72rem", color: T.textMuted }}>
+           <input 
+             type="checkbox" 
+             checked={syncToOther} 
+             onChange={e => setSyncToOther(e.target.checked)}
+             style={{ cursor: "pointer", accentColor: T.accent }}
+           />
+           Also add to {listType === "watch" ? "Reading List" : "Movie List"}?
+         </label>
+      </div>
+
       {detecting && <div style={{ fontSize: "0.75rem", color: T.textMuted, marginBottom: "0.5rem" }}>✨ Auto-detecting genre…</div>}
       <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", marginTop: "0.75rem" }}>
         <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, color: T.textMuted, padding: "0.3rem 0.85rem", fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer" }}>Cancel</button>
@@ -795,11 +811,28 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
     setItems(prev => prev.filter(i => i.id !== id));
   }, [userId, listType]);
 
-  const addItem = async ({ title, section, genres, genre, desc, author }) => {
+  const addItem = async ({ title, section, genres, genre, desc, author }, alsoAddToOther = false) => {
     const id = Date.now();
     const newItem = { id, title, section, genre: genre || genres?.[0] || "Other", genres: genres || [], notes: "", status: todoStatus, added: id, desc: desc || "", rating: 0, _listType: listType, author: author || "" };
+    
+    // Add to current list
     await dbAddItem(userId, newItem, listType);
     setItems(prev => [newItem, ...prev]);
+
+    // HANDLE TOGGLE SYNC
+    if (alsoAddToOther) {
+       const otherType = listType === "watch" ? "read" : "watch";
+       const otherTodoStatus = otherType === "read" ? "unread" : "unwatched";
+       // Auto-detect genre settings for the other medium
+       const detected = await autoDetectGenre(title, otherType);
+       const syncedItem = { 
+         id: id + 1, title, author: author || "", 
+         ...detected, genre: detected.genres?.[0] || "Other", 
+         notes: "Auto-synced from other list", status: otherTodoStatus, added: id + 1, rating: 0, _listType: otherType 
+       };
+       await dbAddItem(userId, syncedItem, otherType);
+    }
+
     setAdding(false);
   };
 
@@ -873,7 +906,7 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
           </div>
           {adding
             ? <AddForm sections={sections} onAdd={addItem} onClose={() => setAdding(false)} theme={T} listType={listType} />
-            : <button onClick={() => setAdding(true)}
+            : <button onClick={() => { setAdding(true); setSubTab("list"); }}
                 style={{ width: "100%", background: "transparent", border: `1px dashed ${T.border}`, borderRadius: 8, color: T.textMuted, padding: "0.72rem", fontSize: "0.85rem", fontFamily: T.font, cursor: "pointer", marginBottom: "1rem", transition: "all 0.15s" }}
                 onMouseEnter={e => { e.target.style.borderColor = T.accent; e.target.style.color = T.accent; }}
                 onMouseLeave={e => { e.target.style.borderColor = T.border; e.target.style.color = T.textMuted; }}
