@@ -23,13 +23,13 @@ const THEMES = {
     text: "#1A2F5A", textMid: "#1A5276", textMuted: "#2E86C1", textFaint: "#85C1E9",
     accent: "#C0392B", danger: "#7B241C",
     pillOn: "#C0392B", pillOnText: "#fff", pillOff: "#D6EAF8", pillOffText: "#1A5276",
-    sectionBg: "#EBF5FB", sectionBorder: "#1A5276",
+    sectionBg: "#8B4413", sectionBorder: "#1A5276",
     font: "'Trebuchet MS', 'Gill Sans', sans-serif",
     headerFont: "'Trebuchet MS', sans-serif",
   },
   gilmore: {
     name: "Gilmore Girls", emoji: "☕",
-    bg: "#F0F4F8", bgCard: "#FFFFFF", bgHeader: "#1B2A4A", bgInput: "#F8FAFC",
+    bg: "#B8D8FF", bgCard: "#8ABEFF", bgHeader: "##0049A3", bgInput: "#F8FAFC",
     border: "#B0BEC5", borderLight: "#CFD8DC",
     text: "#1B2A4A", textMid: "#37474F", textMuted: "#78909C", textFaint: "#B0BEC5",
     accent: "#1B2A4A", danger: "#8B2020",
@@ -40,7 +40,7 @@ const THEMES = {
   },
   muppets: {
     name: "The Muppet Show", emoji: "🎭",
-    bg: "#F5F0E0", bgCard: "#FFFBF0", bgHeader: "#2E7D32", bgInput: "#FFFBF0",
+    bg: "#510201", bgCard: "#A7221C", bgHeader: "#2E7D32", bgInput: "#FFFBF0",
     border: "#C62828", borderLight: "#EF9A9A",
     text: "#1B0000", textMid: "#4A0000", textMuted: "#C62828", textFaint: "#EF9A9A",
     accent: "#C62828", danger: "#7B0000",
@@ -51,7 +51,7 @@ const THEMES = {
   },
   agatha: {
     name: "Agatha All Along", emoji: "🔮",
-    bg: "#F3F0F8", bgCard: "#FFFFFF", bgHeader: "#3B1F5E", bgInput: "#F8F6FC",
+    bg: "#93C998", bgCard: "#7EBF83", bgHeader: "#3B1F5E", bgInput: "#F8F6FC",
     border: "#7E57C2", borderLight: "#C5B3E6",
     text: "#1A0A2E", textMid: "#3B1F5E", textMuted: "#7E57C2", textFaint: "#C5B3E6",
     accent: "#5B8A5F", danger: "#8B1A1A",
