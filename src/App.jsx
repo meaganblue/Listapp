@@ -29,7 +29,7 @@ const THEMES = {
   },
   gilmore: {
     name: "Gilmore Girls", emoji: "☕",
-    bg: "#B8D8FF", bgCard: "#8ABEFF", bgHeader: "#0049A3", bgInput: "#F8FAFC",
+    bg: "#B8D8FF", bgCard: "#8ABEFF", bgHeader: "#003575", bgInput: "#F8FAFC",
     border: "#B0BEC5", borderLight: "#CFD8DC",
     text: "#1B2A4A", textMid: "#37474F", textMuted: "#78909C", textFaint: "#B0BEC5",
     accent: "#1B2A4A", danger: "#8B2020",
@@ -40,7 +40,7 @@ const THEMES = {
   },
   muppets: {
     name: "The Muppet Show", emoji: "🎭",
-    bg: "#510201", bgCard: "#A7221C", bgHeader: "#2E7D32", bgInput: "#FFFBF0",
+    bg: "#A2022C", bgCard: "#DA254F", bgHeader: "#558218", bgInput: "#80A837",
     border: "#C62828", borderLight: "#EF9A9A",
     text: "#1B0000", textMid: "#4A0000", textMuted: "#C62828", textFaint: "#EF9A9A",
     accent: "#C62828", danger: "#7B0000",
