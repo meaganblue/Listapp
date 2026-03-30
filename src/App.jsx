@@ -850,7 +850,7 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
     borderRadius: "6px 6px 0 0",
     color: active ? T.accent : T.textMuted,
     padding: "0.38rem 0.9rem",
-    fontSize: "0.76rem",
+    fontSize: "0.7rem",
     fontFamily: T.font,
     cursor: "pointer",
     fontWeight: active ? "bold" : "normal",
@@ -870,7 +870,6 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
             {t.count > 0 && <span style={{ opacity: 0.65, fontSize: "0.7rem", marginLeft: "0.25rem" }}>({t.count})</span>}
           </button>
         ))}
-        
 
       {/* Tab content */}
       {(subTab === "list" || subTab === "done") && (
@@ -1152,13 +1151,13 @@ export default function App() {
 
         {/* Left sidebar — Watch / Read */}
         <div style={{
-          width: 48,
+          width: 72,
           flexShrink: 0,
           background: T.bgHeader,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: "6.2rem",
+          paddingTop: "1.2rem",
           gap: "0.25rem",
           borderRight: `1px solid ${T.border}`,
         }}>
@@ -1200,4 +1199,4 @@ export default function App() {
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
   );
-    }
+        }
