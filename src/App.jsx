@@ -184,14 +184,7 @@ async function fetchTitleSuggestions(query, listType) {
   } catch { return []; }
 }
 
-async function generateSuggestions(watchItems, readItems) {
-  const rated = [...watchItems, ...readItems].filter(i => i.rating >= 4);
-  if (rated.length === 0) return "Rate items 4–5 ★ after watching or reading to unlock personalised suggestions.";
-  const liked = rated.map(i => `"${i.title}"`).slice(0, 10).join(", ");
-  try {
-    return await callClaude(`User loved: ${liked}. Suggest 5 films/shows AND 3 books they'd enjoy. For each: title + one sentence why. Be specific.`, 600);
-  } catch { return "Could not reach suggestions service."; }
-}
+
 
 // ─────────────────────────────────────────────
 // DOWNLOAD HELPERS
@@ -728,51 +721,6 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
 }
 
 // ─────────────────────────────────────────────
-// SUGGESTIONS PAGE
-// ─────────────────────────────────────────────
-function SuggestionsPage({ userId, theme: T }) {
-  const [watchItems, setWatchItems] = useState([]);
-  const [readItems, setReadItems]   = useState([]);
-  const [suggestions, setSuggestions] = useState("");
-  const [loading, setLoading]       = useState(false);
-  const [dataLoaded, setDataLoaded] = useState(false);
-
-  useEffect(() => {
-    Promise.all([dbGetItems(userId, "watch"), dbGetItems(userId, "read")]).then(([w, r]) => {
-      setWatchItems(w); setReadItems(r); setDataLoaded(true);
-    });
-  }, [userId]);
-
-  const ratedCount = [...watchItems, ...readItems].filter(i => i.rating >= 4).length;
-
-  const load = async () => {
-    setLoading(true);
-    const s = await generateSuggestions(watchItems, readItems);
-    setSuggestions(s);
-    setLoading(false);
-  };
-
-  if (!dataLoaded) return <div style={{ color: T.textFaint, padding: "2rem 0", textAlign: "center" }}>Loading…</div>;
-
-  return (
-    <div style={{ padding: "0.5rem 0" }}>
-      <div style={{ fontSize: "0.78rem", color: T.textMuted, marginBottom: "1rem", lineHeight: 1.5 }}>
-        {ratedCount === 0 ? "Rate items 4–5 ★ to unlock personalised suggestions." : `Based on your ${ratedCount} highly-rated item${ratedCount !== 1 ? "s" : ""}.`}
-      </div>
-      <button onClick={load} disabled={loading || ratedCount === 0}
-        style={{ background: ratedCount === 0 ? T.sectionBg : T.accent, border: `1px solid ${ratedCount === 0 ? T.borderLight : T.accent}`, borderRadius: 8, color: ratedCount === 0 ? T.textFaint : "#fff", padding: "0.55rem 1.4rem", fontSize: "0.85rem", fontFamily: T.font, cursor: ratedCount === 0 ? "not-allowed" : "pointer", marginBottom: "1.2rem", fontWeight: "bold" }}>
-        {loading ? "Thinking…" : "✨ Generate Suggestions"}
-      </button>
-      {suggestions && (
-        <div style={{ background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: 10, padding: "1rem 1.2rem" }}>
-          <pre style={{ margin: 0, fontFamily: T.font, fontSize: "0.85rem", color: T.text, whiteSpace: "pre-wrap", lineHeight: 1.75 }}>{suggestions}</pre>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
 // LIST PAGE
 // ─────────────────────────────────────────────
 function ListPage({ userId, listType, sections, theme: T, profileName }) {
@@ -1100,7 +1048,6 @@ export default function App() {
   const mainTabs = [
     { key: "watch",   label: "🎬 Watch" },
     { key: "read",    label: "📚 Read" },
-    { key: "suggest", label: "✨ For You" },
   ];
 
   return (
@@ -1165,7 +1112,6 @@ export default function App() {
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "1.4rem 1.2rem 5rem" }}>
         {mainTab === "watch"   && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
         {mainTab === "read"    && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} profileName={profile.name} />}
-        {mainTab === "suggest" && <SuggestionsPage key={`s-${profile.id}`} userId={profile.id} theme={T} />}
       </div>
 
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
