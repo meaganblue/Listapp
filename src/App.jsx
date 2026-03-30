@@ -1017,13 +1017,15 @@ export default function App() {
   const [showSwitch, setShowSwitch]       = useState(false);
   const [showManual, setShowManual]       = useState(false);
 
-  useEffect(() => {
+   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setAuthUser(session?.user || null);
     });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user || null);
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
