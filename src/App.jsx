@@ -1010,7 +1010,6 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onEdit, onDelete, theme:
 // ROOT APP
 // ─────────────────────────────────────────────
 export default function App() {
-  const [authUser, setAuthUser]           = useState(undefined);
   const [profiles, setProfiles]           = useState([]);
   const [activeProfile, setActiveProfile] = useState(null);
   const [mainTab, setMainTab]             = useState("watch");
