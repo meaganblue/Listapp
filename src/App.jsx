@@ -1241,7 +1241,8 @@ export default function App() {
         </div>
       </div>
 
-      {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
+      {showSwitch && (
+    <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
       {/* ── BODY: left sidebar + content ── */}
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
