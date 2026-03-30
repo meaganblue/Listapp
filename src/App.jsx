@@ -761,7 +761,7 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
 // ─────────────────────────────────────────────
 // LIST PAGE — status sub-tabs at top, section/genre layout for all tabs
 // ─────────────────────────────────────────────
-function ListPage({ userId, listType, sections, theme: T, profileName, onItemsChange }) {
+function ListPage({ userId, listType, sections, theme: T, profileName }) {
   const todoStatus = listType === "watch" ? "unwatched" : "unread";
   const wipStatus  = listType === "watch" ? "watching"  : "reading";
   const doneStatus = listType === "watch" ? "watched"   : "read";
@@ -773,42 +773,35 @@ function ListPage({ userId, listType, sections, theme: T, profileName, onItemsCh
   const [adding, setAdding]           = useState(false);
   const [ratingItem, setRatingItem]   = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [showDownload, setShowDownload] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    dbGetItems(userId, listType).then(data => {
-      setItems(data);
-      setLoading(false);
-      onItemsChange?.(data);
-    });
+    dbGetItems(userId, listType).then(data => { setItems(data); setLoading(false); });
   }, [userId, listType]);
 
   const cycleStatus = useCallback(async (id) => {
     const order = [todoStatus, wipStatus, doneStatus];
     let updatedItem = null;
-    setItems(prev => {
-      const next = prev.map(item => {
-        if (item.id !== id) return item;
-        const nxt = order[(order.indexOf(item.status) + 1) % order.length];
-        updatedItem = { ...item, status: nxt };
-        return updatedItem;
-      });
-      onItemsChange?.(next);
-      return next;
-    });
+    setItems(prev => prev.map(item => {
+      if (item.id !== id) return item;
+      const next = order[(order.indexOf(item.status) + 1) % order.length];
+      updatedItem = { ...item, status: next };
+      return updatedItem;
+    }));
     if (updatedItem) await dbUpdateItem(userId, updatedItem, listType);
   }, [userId, listType, todoStatus, wipStatus, doneStatus]);
 
   const removeItem = useCallback(async (id) => {
     await dbDeleteItem(userId, id, listType);
-    setItems(prev => { const next = prev.filter(i => i.id !== id); onItemsChange?.(next); return next; });
+    setItems(prev => prev.filter(i => i.id !== id));
   }, [userId, listType]);
 
   const addItem = async ({ title, section, genres, genre, desc, author }, alsoAddToOther = false) => {
     const id = Date.now();
     const newItem = { id, title, section, genre: genre || genres?.[0] || "Other", genres: genres || [], notes: "", status: todoStatus, added: id, desc: desc || "", rating: 0, _listType: listType, author: author || "" };
     await dbAddItem(userId, newItem, listType);
-    setItems(prev => { const next = [newItem, ...prev]; onItemsChange?.(next); return next; });
+    setItems(prev => [newItem, ...prev]);
     if (alsoAddToOther) {
       const otherType = listType === "watch" ? "read" : "watch";
       const otherTodoStatus = otherType === "read" ? "unread" : "unwatched";
@@ -821,31 +814,19 @@ function ListPage({ userId, listType, sections, theme: T, profileName, onItemsCh
 
   const rateItem = useCallback(async (id, rating) => {
     let updatedItem = null;
-    setItems(prev => {
-      const next = prev.map(i => { if (i.id !== id) return i; updatedItem = { ...i, rating }; return updatedItem; });
-      onItemsChange?.(next);
-      return next;
-    });
+    setItems(prev => prev.map(i => { if (i.id !== id) return i; updatedItem = { ...i, rating }; return updatedItem; }));
     if (updatedItem) await dbUpdateItem(userId, updatedItem, listType);
   }, [userId, listType]);
 
   const saveEdit = useCallback(async (id, changes) => {
     let updatedItem = null;
-    setItems(prev => {
-      const next = prev.map(i => { if (i.id !== id) return i; updatedItem = { ...i, ...changes }; return updatedItem; });
-      onItemsChange?.(next);
-      return next;
-    });
+    setItems(prev => prev.map(i => { if (i.id !== id) return i; updatedItem = { ...i, ...changes }; return updatedItem; }));
     if (updatedItem) await dbUpdateItem(userId, updatedItem, listType);
   }, [userId, listType]);
 
   const updateDesc = useCallback(async (id, desc) => {
     let updatedItem = null;
-    setItems(prev => {
-      const next = prev.map(i => { if (i.id !== id) return i; updatedItem = { ...i, desc }; return updatedItem; });
-      onItemsChange?.(next);
-      return next;
-    });
+    setItems(prev => prev.map(i => { if (i.id !== id) return i; updatedItem = { ...i, desc }; return updatedItem; }));
     if (updatedItem) await dbUpdateItem(userId, updatedItem, listType);
   }, [userId, listType]);
 
@@ -861,14 +842,15 @@ function ListPage({ userId, listType, sections, theme: T, profileName, onItemsCh
 
   if (loading) return <div style={{ color: T.textFaint, padding: "2rem 0", textAlign: "center" }}>Loading…</div>;
 
+  // Active tab style: tab sits flush against content, no bottom border
   const tabStyle = (active) => ({
     background: active ? T.bg : "transparent",
     border: `1px solid ${active ? T.border : "transparent"}`,
     borderBottom: active ? `1px solid ${T.bg}` : `1px solid ${T.border}`,
     borderRadius: "6px 6px 0 0",
     color: active ? T.accent : T.textMuted,
-    padding: "0.35rem 0.75rem",
-    fontSize: "0.73rem",
+    padding: "0.38rem 0.9rem",
+    fontSize: "0.76rem",
     fontFamily: T.font,
     cursor: "pointer",
     fontWeight: active ? "bold" : "normal",
@@ -880,14 +862,34 @@ function ListPage({ userId, listType, sections, theme: T, profileName, onItemsCh
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Sub-tab bar — no export here, it's in the header now */}
-      <div style={{ display: "flex", alignItems: "flex-end", borderBottom: `1px solid ${T.border}`, marginBottom: "0.9rem", gap: "0.12rem" }}>
+      {/* Sub-tab bar */}
+      <div style={{ display: "flex", alignItems: "flex-end", borderBottom: `1px solid ${T.border}`, marginBottom: "1rem", gap: "0.15rem" }}>
         {subTabs.map(t => (
           <button key={t.key} onClick={() => { setSubTab(t.key); setSearch(""); }} style={tabStyle(subTab === t.key)}>
             {t.label}
-            {t.count > 0 && <span style={{ opacity: 0.6, fontSize: "0.67rem", marginLeft: "0.22rem" }}>({t.count})</span>}
+            {t.count > 0 && <span style={{ opacity: 0.65, fontSize: "0.7rem", marginLeft: "0.25rem" }}>({t.count})</span>}
           </button>
         ))}
+        {/* Export pushed to right */}
+        <div style={{ marginLeft: "auto", position: "relative", paddingBottom: 1 }}>
+          <button onClick={() => setShowDownload(s => !s)} style={{ background: T.sectionBg, border: `1px solid ${T.border}`, borderRadius: 6, color: T.textMuted, padding: "0.28rem 0.65rem", fontSize: "0.68rem", fontFamily: T.font, cursor: "pointer" }}>
+            ⬇ Export
+          </button>
+          {showDownload && (
+            <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.4rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: "0.4rem", zIndex: 50, minWidth: 130, boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }}>
+              <button onClick={() => { downloadCSV(items, listType, profileName); setShowDownload(false); }}
+                style={{ width: "100%", background: "transparent", border: "none", padding: "0.4rem 0.6rem", color: T.text, fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer", textAlign: "left", borderRadius: 5 }}
+                onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >📊 Download CSV</button>
+              <button onClick={() => { downloadTXT(items, listType, profileName); setShowDownload(false); }}
+                style={{ width: "100%", background: "transparent", border: "none", padding: "0.4rem 0.6rem", color: T.text, fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer", textAlign: "left", borderRadius: 5 }}
+                onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >📄 Download TXT</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tab content */}
@@ -947,6 +949,7 @@ function ListPage({ userId, listType, sections, theme: T, profileName, onItemsCh
 
       {ratingItem && <RatingModal item={ratingItem} onRate={r => rateItem(ratingItem.id, r)} onClose={() => setRatingItem(null)} theme={T} />}
       {editingItem && <EditModal item={editingItem} sections={sections} onSave={changes => saveEdit(editingItem.id, changes)} onClose={() => setEditingItem(null)} theme={T} listType={listType} />}
+      {showDownload && <div style={{ position: "fixed", inset: 0, zIndex: 40 }} onClick={() => setShowDownload(false)} />}
     </div>
   );
 }
@@ -962,23 +965,7 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
   const inputRef = useRef(null);
 
   return (
-      <div style={{
-      minHeight: "100vh",
-      backgroundImage: "url('/Icon.png')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "2rem",
-      fontFamily: "Georgia, serif",
-      position: "relative",
-    }}>
-      {/* Dark overlay for readability */}
-      <div style={{ position: "absolute", inset: 0, background: "rgba(10,8,20,0.62)", backdropFilter: "blur(1px)", zIndex: 0 }} />
-      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Georgia, serif" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
       <div style={{ color: "#E0D4FF", fontSize: "2rem", marginBottom: "0.3rem", letterSpacing: "0.08em" }}>✦ Lists</div>
       <div style={{ color: "#8888BB", fontSize: "0.78rem", marginBottom: "3rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>Who's watching?</div>
@@ -992,9 +979,9 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.transform = "translateY(0)"; }}
               >
-                <span style={{ display: "block", width: 54, height: 54, borderRadius: "50%", background: Th.bgHeader, border: `2px solid ${Th.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{u.avatar}</span>
-                <span style={{ display: "block", color: "#E0D4FF", fontSize: "0.88rem" }}>{u.name}</span>
-                <span style={{ display: "block", color: "#8888BB", fontSize: "0.62rem", letterSpacing: "0.08em" }}>{Th.emoji} {Th.name.split(" ").slice(0,2).join(" ")}</span>
+                <div style={{ width: 54, height: 54, borderRadius: "50%", background: Th.bgHeader, border: `2px solid ${Th.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{u.avatar}</div>
+                <div style={{ color: "#E0D4FF", fontSize: "0.88rem" }}>{u.name}</div>
+                <div style={{ color: "#8888BB", fontSize: "0.62rem", letterSpacing: "0.08em" }}>{Th.emoji} {Th.name.split(" ").slice(0,2).join(" ")}</div>
               </button>
               <div style={{ display: "flex", gap: "0.3rem", justifyContent: "center", marginTop: "0.5rem" }}>
                 <button onClick={() => setEditingTheme(editingTheme === u.id ? null : u.id)}
@@ -1043,13 +1030,12 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
       </div>
 
       <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-        <button onClick={onLogout} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 8, color: "rgba(200,195,230,0.85)", padding: "0.4rem 1.2rem", fontSize: "0.78rem", fontFamily: "Georgia, serif", cursor: "pointer" }}>Log out</button>
-        <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: "none", color: "rgba(160,180,255,0.85)", fontSize: "0.75rem", fontFamily: "Georgia, serif", cursor: "pointer", textDecoration: "underline" }}>Help / Manual</button>
+        <button onClick={onLogout} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: "#6666AA", padding: "0.4rem 1.2rem", fontSize: "0.78rem", fontFamily: "Georgia, serif", cursor: "pointer" }}>Log out</button>
+        <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: "none", color: "#6677BB", fontSize: "0.75rem", fontFamily: "Georgia, serif", cursor: "pointer", textDecoration: "underline" }}>Help / Manual</button>
       </div>
-      </div>{/* end zIndex wrapper */}
     </div>
   );
-                      }
+}
 
 // ─────────────────────────────────────────────
 // ROOT APP — left sidebar for Watch/Read, no outer border
@@ -1124,65 +1110,26 @@ export default function App() {
   const T = THEMES[profile.theme] || THEMES.beautyandthebeast;
 
   const mainTabs = [
-    { key: "watch", emoji: "🎬", label: "Watch" },
-    { key: "read",  emoji: "📚", label: "Read" },
+    { key: "watch", label: "🎬 Watch" },
+    { key: "read",  label: "📚 Read" },
   ];
 
-  // Export state lives here so header can trigger it
-  const [showExport, setShowExport] = useState(false);
-  // We need a ref to the active ListPage's items — easier to pass a callback up
-  // We'll store items via an upward ref pattern using a shared state key
-  const [exportItems, setExportItems]   = useState([]);
-  const [exportType, setExportType]     = useState("watch");
-
   return (
+    // No margin/padding on root — full bleed, no border
     <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, color: T.text, display: "flex", flexDirection: "column" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
 
       {/* ── HEADER ── */}
-      <div style={{ background: T.bgHeader, padding: "0.6rem 1rem", position: "sticky", top: 0, zIndex: 20, flexShrink: 0 }}>
+      <div style={{ background: T.bgHeader, padding: "0.75rem 1.2rem", position: "sticky", top: 0, zIndex: 20, flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* Left: avatar + name */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "1.05rem" }}>{profile.avatar}</span>
-            <span style={{ fontSize: "0.88rem", fontFamily: T.headerFont, color: "#fff", fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+            <span style={{ fontSize: "1.15rem" }}>{profile.avatar}</span>
+            <span style={{ fontSize: "0.92rem", fontFamily: T.headerFont, color: "#fff", fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
           </div>
-
-          {/* Right: export + help + switch — all small, uniform */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-            {/* Export */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+            <button onClick={() => setShowManual(true)} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20, padding: "0.25rem 0.6rem", fontSize: "0.68rem", fontFamily: T.font, color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>?</button>
             <div style={{ position: "relative" }}>
-              <button onClick={() => setShowExport(s => !s)}
-                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, color: "rgba(255,255,255,0.75)", padding: "0.22rem 0.55rem", fontSize: "0.65rem", fontFamily: T.font, cursor: "pointer", whiteSpace: "nowrap" }}>
-                ⬇ Export
-              </button>
-              {showExport && (
-                <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.4rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: "0.4rem", zIndex: 100, minWidth: 140, boxShadow: "0 4px 12px rgba(0,0,0,0.18)" }}>
-                  <div style={{ fontSize: "0.6rem", color: T.textFaint, padding: "0.2rem 0.5rem 0.3rem", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                    {mainTab === "watch" ? "Watch list" : "Read list"}
-                  </div>
-                  <button onClick={() => { downloadCSV(exportItems, exportType, profile.name); setShowExport(false); }}
-                    style={{ width: "100%", background: "transparent", border: "none", padding: "0.38rem 0.55rem", color: T.text, fontSize: "0.78rem", fontFamily: T.font, cursor: "pointer", textAlign: "left", borderRadius: 5 }}
-                    onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
-                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                  >📊 CSV</button>
-                  <button onClick={() => { downloadTXT(exportItems, exportType, profile.name); setShowExport(false); }}
-                    style={{ width: "100%", background: "transparent", border: "none", padding: "0.38rem 0.55rem", color: T.text, fontSize: "0.78rem", fontFamily: T.font, cursor: "pointer", textAlign: "left", borderRadius: 5 }}
-                    onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
-                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                  >📄 TXT</button>
-                </div>
-              )}
-            </div>
-
-            {/* Help */}
-            <button onClick={() => setShowManual(true)}
-              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, color: "rgba(255,255,255,0.75)", padding: "0.22rem 0.5rem", fontSize: "0.65rem", fontFamily: T.font, cursor: "pointer" }}>?</button>
-
-            {/* Switch */}
-            <div style={{ position: "relative" }}>
-              <button onClick={() => setShowSwitch(s => !s)}
-                style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 6, padding: "0.22rem 0.6rem", fontSize: "0.65rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+              <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "0.25rem 0.7rem", fontSize: "0.7rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem" }}>
                 <span>⇄</span><span>Switch</span>
               </button>
               {showSwitch && (
@@ -1210,112 +1157,57 @@ export default function App() {
         </div>
       </div>
 
-      {/* ── BODY: card-index tab strip + content ── */}
+      {/* ── BODY: left sidebar + content ── */}
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
 
-        {/*
-          Card-index left tab strip.
-          The two tabs are equal height, vertically centred in the strip.
-          Each tab looks like a card-index divider: narrow, sticking out to the right,
-          with a shadow making it appear raised when active.
-        */}
+        {/* Left sidebar — Watch / Read */}
         <div style={{
+          width: 72,
           flexShrink: 0,
+          background: T.bgHeader,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          gap: "2px",
-          padding: "0",
-          width: 36,
-          background: "transparent",
-          position: "relative",
-          zIndex: 5,
+          alignItems: "center",
+          paddingTop: "1.2rem",
+          gap: "0.25rem",
+          borderRight: `1px solid ${T.border}`,
         }}>
           {mainTabs.map(t => {
             const active = mainTab === t.key;
             return (
-              <button
-                key={t.key}
-                onClick={() => { setMainTab(t.key); setExportType(t.key); }}
-                title={t.label}
-                style={{
-                  // Card-index tab: wider than strip, "sticking" right into content
-                  width: active ? 34 : 30,
-                  height: 64,
-                  background: active ? T.bg : T.bgHeader,
-                  border: `1px solid ${T.border}`,
-                  borderRight: active ? `1px solid ${T.bg}` : `1px solid ${T.border}`,
-                  borderRadius: "6px 0 0 6px",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "3px",
-                  marginLeft: active ? 0 : 4,
-                  // Raised card shadow when active
-                  boxShadow: active
-                    ? "-2px 0 6px rgba(0,0,0,0.18)"
-                    : "none",
-                  transition: "all 0.14s",
-                  position: "relative",
-                  zIndex: active ? 3 : 1,
-                }}
-              >
-                <span style={{ fontSize: "1rem", lineHeight: 1 }}>{t.emoji}</span>
-                <span style={{
-                  fontSize: "0.48rem",
-                  fontFamily: T.font,
-                  letterSpacing: "0.05em",
-                  color: active ? T.accent : "rgba(255,255,255,0.55)",
-                  textTransform: "uppercase",
-                  fontWeight: active ? "bold" : "normal",
-                }}>
-                  {t.label}
+              <button key={t.key} onClick={() => setMainTab(t.key)} style={{
+                width: "100%",
+                background: active ? T.bg : "transparent",
+                border: "none",
+                borderLeft: active ? `3px solid ${T.accent}` : "3px solid transparent",
+                borderRight: "none",
+                color: active ? T.accent : "rgba(255,255,255,0.6)",
+                padding: "0.7rem 0",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.28rem",
+                fontSize: "1.2rem",
+                transition: "all 0.15s",
+              }}>
+                <span>{t.label.split(" ")[0]}</span>
+                <span style={{ fontSize: "0.55rem", fontFamily: T.font, letterSpacing: "0.04em", opacity: active ? 1 : 0.7 }}>
+                  {t.label.split(" ").slice(1).join(" ")}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* Main content — left border lines up with tab edge */}
-        <div style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "1rem 1rem 4rem 0.75rem",
-          borderLeft: `1px solid ${T.border}`,
-          background: T.bg,
-        }}>
-          {mainTab === "watch" && (
-            <ListPage
-              key={`w-${profile.id}`}
-              userId={profile.id}
-              listType="watch"
-              sections={WATCH_SECTIONS}
-              theme={T}
-              profileName={profile.name}
-              onItemsChange={(items) => { setExportItems(items); setExportType("watch"); }}
-            />
-          )}
-          {mainTab === "read" && (
-            <ListPage
-              key={`r-${profile.id}`}
-              userId={profile.id}
-              listType="read"
-              sections={READ_SECTIONS}
-              theme={T}
-              profileName={profile.name}
-              onItemsChange={(items) => { setExportItems(items); setExportType("read"); }}
-            />
-          )}
+        {/* Main content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "1.2rem 1.1rem 4rem" }}>
+          {mainTab === "watch" && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
+          {mainTab === "read"  && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} profileName={profile.name} />}
         </div>
       </div>
 
-      {(showSwitch || showExport) && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 15 }}
-          onClick={() => { setShowSwitch(false); setShowExport(false); }} />
-      )}
+      {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
   );
-}
+    }
