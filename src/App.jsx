@@ -900,7 +900,7 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
 // PROFILE SELECT PAGE
 // ─────────────────────────────────────────────
 function ProfileSelectPage({ profiles, onSelect, onAdd, onEdit, onDelete, theme: T }) {
-  const [newName, setNewName] = useState("");
+    const [newName, setNewName] = useState("");
   const [addingProfile, setAddingProfile] = useState(false);
   const [editingTheme, setEditingTheme] = useState(null);
   const [showManual, setShowManual] = useState(false);
