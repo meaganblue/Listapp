@@ -1010,6 +1010,7 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onEdit, onDelete, theme:
 // ROOT APP
 // ─────────────────────────────────────────────
 export default function App() {
+  const [authUser, setAuthUser]           = useState(undefined);
   const [profiles, setProfiles]           = useState([]);
   const [activeProfile, setActiveProfile] = useState(null);
   const [mainTab, setMainTab]             = useState("watch");
@@ -1149,4 +1150,4 @@ export default function App() {
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
   );
-    }
+                                      }
