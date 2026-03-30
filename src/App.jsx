@@ -548,9 +548,17 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
 // ─────────────────────────────────────────────
 // GENRE SECTION
 // ─────────────────────────────────────────────
-function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T }) {
+
+function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, isArchive }) {
   const [open, setOpen] = useState(true);
   if (items.length === 0) return null;
+
+  // Sort by rating (5 stars first), then by date added
+  const sortedItems = [...items].sort((a, b) => {
+    if (b.rating !== a.rating) return (b.rating || 0) - (a.rating || 0);
+    return b.added - a.added;
+  });
+
   return (
     <div style={{ marginBottom: "0.5rem" }}>
       <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: "transparent", border: "none", cursor: "pointer", padding: "0.28rem 0", textAlign: "left" }}>
@@ -558,8 +566,8 @@ function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, 
         <span style={{ flex: 1, height: 1, background: T.borderLight }} />
         <span style={{ fontSize: "0.62rem", color: T.textFaint }}>{items.length} {open ? "▲" : "▼"}</span>
       </button>
-      {open && items.map(item => (
-        <ItemRow key={item.id} item={item} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} isArchive={false} />
+      {open && sortedItems.map(item => (
+        <ItemRow key={item.id} item={item} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} isArchive={isArchive} />
       ))}
     </div>
   );
@@ -568,14 +576,16 @@ function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, 
 // ─────────────────────────────────────────────
 // MAIN SECTION
 // ─────────────────────────────────────────────
-function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, search, listType }) {
+function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, search, statusFilter, isArchive }) {
   const [open, setOpen] = useState(true);
-  const todoStatus = listType === "read" ? "unread" : "unwatched";
+  
+  // Only show items that match the section AND the status (unwatched vs watched)
   const filtered = items.filter(i =>
-    i.section === sectionKey && i.status === todoStatus &&
+    i.section === sectionKey && i.status === statusFilter &&
     (i.title.toLowerCase().includes(search.toLowerCase()) ||
      (i.author && i.author.toLowerCase().includes(search.toLowerCase())))
   );
+  
   if (filtered.length === 0) return null;
 
   const byGenre = {};
@@ -598,13 +608,14 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
       {open && (
         <div style={{ paddingLeft: "0.4rem" }}>
           {sectionDef.genres.map(g => (
-            <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} />
+            <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} isArchive={isArchive} />
           ))}
         </div>
       )}
     </div>
   );
 }
+
 
 // ─────────────────────────────────────────────
 // ARCHIVE SECTION
@@ -849,25 +860,66 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
       {subTab === "list" && (
         <>
           <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search titles or authors…"
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search titles..."
               style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.38rem 0.7rem", fontSize: "0.83rem", fontFamily: T.font, outline: "none" }} />
           </div>
           {adding
             ? <AddForm sections={sections} onAdd={addItem} onClose={() => setAdding(false)} theme={T} listType={listType} />
-            : <button onClick={() => { setAdding(true); setSubTab("list"); }}
-                style={{ width: "100%", background: "transparent", border: `1px dashed ${T.border}`, borderRadius: 8, color: T.textMuted, padding: "0.72rem", fontSize: "0.85rem", fontFamily: T.font, cursor: "pointer", marginBottom: "1rem", transition: "all 0.15s" }}
-                onMouseEnter={e => { e.target.style.borderColor = T.accent; e.target.style.color = T.accent; }}
-                onMouseLeave={e => { e.target.style.borderColor = T.border; e.target.style.color = T.textMuted; }}
-              >+ Add {listType === "watch" ? "title" : "book"}</button>
+            : <button onClick={() => setAdding(true)} style={{ width: "100%", background: "transparent", border: `1px dashed ${T.border}`, borderRadius: 8, color: T.textMuted, padding: "0.72rem", fontSize: "0.85rem", fontFamily: T.font, cursor: "pointer", marginBottom: "1rem" }}>+ Add {listType === "watch" ? "title" : "book"}</button>
           }
-          {items.length === 0 && !adding && (
-            <div style={{ color: T.textFaint, textAlign: "center", padding: "3rem 0", fontSize: "0.85rem" }}>Nothing here yet. Add something!</div>
-          )}
           {Object.entries(sections).map(([key, def]) => (
-            <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} listType={listType} />
+            <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} statusFilter={todoStatus} isArchive={false} />
           ))}
         </>
       )}
+
+      {subTab === "wip" && (
+        <ArchiveSection items={wipItems} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} theme={T} title={listType === "watch" ? "Currently Watching" : "Currently Reading"} />
+      )}
+
+      {subTab === "done" && (
+        <>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search finished..."
+              style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.38rem 0.7rem", fontSize: "0.83rem", fontFamily: T.font, outline: "none" }} />
+          </div>
+          {Object.entries(sections).map(([key, def]) => (
+            <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} statusFilter={doneStatus} isArchive={true} />
+          ))}
+        </>
+      )}
+
+
+      {subTab === "done" && (
+        <>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+            <input 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+              placeholder="Search finished items..."
+              style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.38rem 0.7rem", fontSize: "0.83rem", fontFamily: T.font, outline: "none" }} 
+            />
+          </div>
+          {Object.entries(sections).map(([key, def]) => (
+            <MainSection 
+              key={key} 
+              sectionKey={key} 
+              sectionDef={def} 
+              items={items} 
+              onCycle={cycleStatus} 
+              onRemove={removeItem} 
+              onRateRequest={setRatingItem} 
+              onEdit={setEditingItem} 
+              onDescUpdate={updateDesc} 
+              theme={T} 
+              search={search} 
+              statusFilter={doneStatus} 
+              isArchive={true} 
+            />
+          ))}
+        </>
+      )}
+
 
       {subTab === "wip" && (
         <ArchiveSection items={wipItems} onCycle={cycleStatus} onRateRequest={setRatingItem} onRemove={removeItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T}
