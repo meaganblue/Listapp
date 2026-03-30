@@ -727,6 +727,50 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
   );
 }
 
+// ─────────────────────────────────────────────
+// SUGGESTIONS PAGE
+// ─────────────────────────────────────────────
+function SuggestionsPage({ userId, theme: T }) {
+  const [watchItems, setWatchItems] = useState([]);
+  const [readItems, setReadItems]   = useState([]);
+  const [suggestions, setSuggestions] = useState("");
+  const [loading, setLoading]       = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  useEffect(() => {
+    Promise.all([dbGetItems(userId, "watch"), dbGetItems(userId, "read")]).then(([w, r]) => {
+      setWatchItems(w); setReadItems(r); setDataLoaded(true);
+    });
+  }, [userId]);
+
+  const ratedCount = [...watchItems, ...readItems].filter(i => i.rating >= 4).length;
+
+  const load = async () => {
+    setLoading(true);
+    const s = await generateSuggestions(watchItems, readItems);
+    setSuggestions(s);
+    setLoading(false);
+  };
+
+  if (!dataLoaded) return <div style={{ color: T.textFaint, padding: "2rem 0", textAlign: "center" }}>Loading…</div>;
+
+  return (
+    <div style={{ padding: "0.5rem 0" }}>
+      <div style={{ fontSize: "0.78rem", color: T.textMuted, marginBottom: "1rem", lineHeight: 1.5 }}>
+        {ratedCount === 0 ? "Rate items 4–5 ★ to unlock personalised suggestions." : `Based on your ${ratedCount} highly-rated item${ratedCount !== 1 ? "s" : ""}.`}
+      </div>
+      <button onClick={load} disabled={loading || ratedCount === 0}
+        style={{ background: ratedCount === 0 ? T.sectionBg : T.accent, border: `1px solid ${ratedCount === 0 ? T.borderLight : T.accent}`, borderRadius: 8, color: ratedCount === 0 ? T.textFaint : "#fff", padding: "0.55rem 1.4rem", fontSize: "0.85rem", fontFamily: T.font, cursor: ratedCount === 0 ? "not-allowed" : "pointer", marginBottom: "1.2rem", fontWeight: "bold" }}>
+        {loading ? "Thinking…" : "✨ Generate Suggestions"}
+      </button>
+      {suggestions && (
+        <div style={{ background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: 10, padding: "1rem 1.2rem" }}>
+          <pre style={{ margin: 0, fontFamily: T.font, fontSize: "0.85rem", color: T.text, whiteSpace: "pre-wrap", lineHeight: 1.75 }}>{suggestions}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────
 // LIST PAGE
@@ -1127,4 +1171,4 @@ export default function App() {
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
   );
-                                                            }
+      }
