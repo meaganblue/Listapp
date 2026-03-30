@@ -650,7 +650,7 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
 
   return (
     <div style={{ marginBottom: "0.85rem" }}>
-      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: 7, padding: "0.42rem 0.75rem", cursor: "pointer", marginBottom: open ? "0.4rem" : 0 }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: "6px 6px 0 0",, padding: "0.42rem 0.75rem", cursor: "pointer", marginBottom: open ? "0.4rem" : 0 }}>
         <span style={{ fontSize: "0.9rem" }}>{sectionDef.icon}</span>
         <span style={{ fontSize: "0.82rem", fontFamily: T.headerFont, color: T.text, fontWeight: "bold" }}>{sectionKey}</span>
         <span style={{ fontSize: "0.67rem", color: T.textMuted }}>({filtered.length})</span>
@@ -847,7 +847,7 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
     background: active ? T.bg : "transparent",
     border: `1px solid ${active ? T.border : "transparent"}`,
     borderBottom: active ? `1px solid ${T.bg}` : `1px solid ${T.border}`,
-    borderRadius: "6px 6px 0 0",
+    borderRadius: 6,
     color: active ? T.accent : T.textMuted,
     padding: "0.38rem 0.9rem",
     fontSize: "0.76rem",
