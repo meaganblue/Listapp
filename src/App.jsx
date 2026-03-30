@@ -965,7 +965,17 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
   const inputRef = useRef(null);
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Georgia, serif" }}>
+    <div style={{ minHeight: "100vh",
+                 backgroundImage: "url('/Icon.png')",
+                 backgroundSize: "cover",
+                 backgroundPosition: "center",
+                 backgroundRepeat: "no-repeat",
+                 display: "flex",
+                 flexDirection: "column",
+                 alignItems: "center",
+                 justifyContent: "center",
+                 padding: "2rem",
+                 fontFamily: "Georgia, serif" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
       <div style={{ color: "#E0D4FF", fontSize: "2rem", marginBottom: "0.3rem", letterSpacing: "0.08em" }}>✦ Lists</div>
       <div style={{ color: "#8888BB", fontSize: "0.78rem", marginBottom: "3rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>Who's watching?</div>
