@@ -1079,7 +1079,13 @@ export default function App() {
   };
 
   if (authUser === undefined) return (
-    <div style={{ minHeight: "100vh", background: "#1a1a2e", display: "flex", alignItems: "center", justifyContent: "center", color: "#8888BB", fontFamily: "Georgia, serif" }}>Loading…</div>
+    <div style={{ minHeight: "100vh", 
+                 background: "#1a1a2e", 
+                 display: "flex", 
+                 alignItems: "center", 
+                 justifyContent: "center", 
+                 color: "#8888BB", 
+                 fontFamily: "Georgia, serif" }}>Loading…</div>
   );
 
   if (!authUser) return <AuthPage onAuth={(user) => setAuthUser(user)} />;
@@ -1126,24 +1132,73 @@ export default function App() {
 
   return (
     // No margin/padding on root — full bleed, no border
-    <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, color: T.text, display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", 
+                 background: T.bg, 
+                 fontFamily: T.font, 
+                 color: T.text, 
+                 display: "flex", 
+                 flexDirection: "column" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
 
       {/* ── HEADER ── */}
-      <div style={{ background: T.bgHeader, padding: "0.75rem 1.2rem", position: "sticky", top: 0, zIndex: 20, flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+      <div style={{ background: T.bgHeader, 
+                   padding: "0.75rem 1.2rem", 
+                   position: "sticky", 
+                   top: 0, 
+                   zIndex: 20, 
+                   flexShrink: 0 }}>
+        <div style={{ display: "flex", 
+                     alignItems: "center", 
+                     justifyContent: "space-between" }}>
+          <div style={{ display: "flex", 
+                       alignItems: "center",
+                       gap: "0.55rem" }}>
             <span style={{ fontSize: "1.15rem" }}>{profile.avatar}</span>
-            <span style={{ fontSize: "0.92rem", fontFamily: T.headerFont, color: "#fff", fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
+            <span style={{ fontSize: "0.92rem", 
+                          fontFamily: T.headerFont, 
+                          color: "#fff", 
+                          fontWeight: "bold", 
+                          letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-            <button onClick={() => setShowManual(true)} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20, padding: "0.25rem 0.6rem", fontSize: "0.68rem", fontFamily: T.font, color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>?</button>
+          <div style={{ display: "flex", 
+                       alignItems: "center", 
+                       gap: "0.45rem" }}>
+            <button onClick={() => setShowManual(true)} 
+      style={{ 
+      background: "rgba(255,255,255,0.1)", 
+      border: "1px solid rgba(255,255,255,0.2)", 
+      borderRadius: 20, 
+      padding: "0.25rem 0.6rem", 
+      fontSize: "0.68rem", 
+      fontFamily: T.font, 
+      color: "rgba(255,255,255,0.7)", 
+      cursor: "pointer" }}>?</button>
             <div style={{ position: "relative" }}>
-              <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "0.25rem 0.7rem", fontSize: "0.7rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+              <button onClick={() => setShowSwitch(s => !s)} 
+                style={{ 
+                  background: "rgba(255,255,255,0.15)", 
+                  border: "1px solid rgba(255,255,255,0.3)", 
+                  borderRadius: 20, 
+                  padding: "0.25rem 0.7rem", 
+                  fontSize: "0.7rem", 
+                  fontFamily: T.font, 
+                  color: "#fff", 
+                  cursor: "pointer", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "0.3rem" }}>
                 <span>⇄</span><span>Switch</span>
               </button>
               {showSwitch && (
-                <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.5rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0.5rem", zIndex: 100, minWidth: 160, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+                <div style={{ position: "absolute", 
+                             right: 0, top: "calc(100% + 0.5rem)", 
+                             background: T.bgCard, 
+                             border: `1px solid ${T.border}`, 
+                             borderRadius: 10, 
+                             padding: "0.5rem", 
+                             zIndex: 100,
+                             minWidth: 160, 
+                             boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
                   {profiles.map(p => (
                     <button key={p.id} onClick={() => { setActiveProfile(p.id); setShowSwitch(false); setMainTab("watch"); }}
                       style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: p.id === activeProfile ? T.sectionBg : "transparent", border: "none", borderRadius: 6, padding: "0.42rem 0.6rem", cursor: "pointer", color: T.text, fontSize: "0.82rem", fontFamily: T.font, marginBottom: "0.12rem" }}>
@@ -1193,7 +1248,7 @@ export default function App() {
                 borderRight: "none",
                 color: active ? T.accent : "rgba(255,255,255,0.6)",
                 padding: "0.7rem 0",
-                height: "24.5rem",
+                height: "14.5rem",
                 cursor: "pointer",
                 display: "flex",
                 flexDirection: "column",
