@@ -184,8 +184,6 @@ async function fetchTitleSuggestions(query, listType) {
   } catch { return []; }
 }
 
-
-
 // ─────────────────────────────────────────────
 // DOWNLOAD HELPERS
 // ─────────────────────────────────────────────
@@ -272,7 +270,7 @@ function ManualModal({ onClose }) {
 }
 
 // ─────────────────────────────────────────────
-// AUTH PAGE
+// AUTH PAGE — background uses Icon.png
 // ─────────────────────────────────────────────
 function AuthPage({ onAuth }) {
   const [mode, setMode]         = useState("login");
@@ -304,48 +302,65 @@ function AuthPage({ onAuth }) {
   };
 
   const inp = {
-    width: "100%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)",
-    borderRadius: 8, color: "#E0D4FF", padding: "0.7rem 1rem", fontSize: "0.95rem",
+    width: "100%", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
+    borderRadius: 8, color: "#F0EAD6", padding: "0.7rem 1rem", fontSize: "0.95rem",
     fontFamily: "Georgia, serif", outline: "none", boxSizing: "border-box",
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Georgia, serif" }}>
-      {showManual && <ManualModal onClose={() => setShowManual(false)} />}
+    <div style={{
+      minHeight: "100vh",
+      backgroundImage: "url('/Icon.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem",
+      fontFamily: "Georgia, serif",
+      position: "relative",
+    }}>
+      {/* Dark overlay for readability */}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(10,8,20,0.62)", backdropFilter: "blur(1px)" }} />
 
-      <div style={{ color: "#E0D4FF", fontSize: "2.2rem", marginBottom: "0.3rem", letterSpacing: "0.08em" }}>✦ Lists</div>
+      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {showManual && <ManualModal onClose={() => setShowManual(false)} />}
 
-      {/* App blurb */}
-      <div style={{ maxWidth: 320, textAlign: "center", marginBottom: "2rem" }}>
-        <div style={{ color: "#9988CC", fontSize: "0.82rem", lineHeight: 1.6 }}>
-          Your personal watch list and reading tracker. Add films, shows, books and more — organised by genre, tracked as you go, rated when you're done. Create up to 4 profiles per account to share with your household.
+        <div style={{ color: "#F0EAD6", fontSize: "2.2rem", marginBottom: "0.3rem", letterSpacing: "0.08em", textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>✦ Lists</div>
+
+        <div style={{ maxWidth: 300, textAlign: "center", marginBottom: "2rem" }}>
+          <div style={{ color: "rgba(220,210,255,0.85)", fontSize: "0.82rem", lineHeight: 1.6 }}>
+            Your personal watch list and reading tracker. Add films, shows, books and more — organised by genre, tracked as you go, rated when you're done. Create up to 4 profiles per account to share with your household.
+          </div>
+          <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: "none", color: "rgba(160,180,255,0.85)", fontSize: "0.75rem", cursor: "pointer", textDecoration: "underline", marginTop: "0.5rem" }}>
+            How does it work? →
+          </button>
         </div>
-        <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: "none", color: "#6677BB", fontSize: "0.75rem", cursor: "pointer", textDecoration: "underline", marginTop: "0.5rem" }}>
-          How does it work? →
-        </button>
-      </div>
 
-      <div style={{ color: "#8888BB", fontSize: "0.75rem", marginBottom: "1.5rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-        {mode === "login" ? "Welcome back" : "Create account"}
-      </div>
+        <div style={{ color: "rgba(200,195,230,0.8)", fontSize: "0.75rem", marginBottom: "1.5rem", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+          {mode === "login" ? "Welcome back" : "Create account"}
+        </div>
 
-      <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-        <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username"
-          onKeyDown={e => e.key === "Enter" && handle()} style={inp} autoCapitalize="none" autoCorrect="off" />
-        <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" type="password"
-          onKeyDown={e => e.key === "Enter" && handle()} style={inp} />
-        {error && <div style={{ color: "#FF8888", fontSize: "0.8rem", textAlign: "center" }}>{error}</div>}
-        <button onClick={handle} disabled={loading} style={{ background: "#5A3EA6", border: "none", borderRadius: 8, color: "#fff", padding: "0.75rem", fontSize: "0.95rem", fontFamily: "Georgia, serif", cursor: loading ? "not-allowed" : "pointer", fontWeight: "bold", opacity: loading ? 0.7 : 1 }}>
-          {loading ? "…" : mode === "login" ? "Log In" : "Create Account"}
-        </button>
-        <button onClick={() => { setMode(m => m === "login" ? "signup" : "login"); setError(""); }}
-          style={{ background: "transparent", border: "none", color: "#8888BB", fontSize: "0.82rem", fontFamily: "Georgia, serif", cursor: "pointer", textDecoration: "underline" }}>
-          {mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
-        </button>
-      </div>
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+          <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username"
+            onKeyDown={e => e.key === "Enter" && handle()} style={inp} autoCapitalize="none" autoCorrect="off" />
+          <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" type="password"
+            onKeyDown={e => e.key === "Enter" && handle()} style={inp} />
+          {error && <div style={{ color: "#FF9999", fontSize: "0.8rem", textAlign: "center" }}>{error}</div>}
+          <button onClick={handle} disabled={loading} style={{ background: "rgba(90,62,166,0.85)", border: "1px solid rgba(160,130,220,0.4)", borderRadius: 8, color: "#fff", padding: "0.75rem", fontSize: "0.95rem", fontFamily: "Georgia, serif", cursor: loading ? "not-allowed" : "pointer", fontWeight: "bold", opacity: loading ? 0.7 : 1 }}>
+            {loading ? "…" : mode === "login" ? "Log In" : "Create Account"}
+          </button>
+          <button onClick={() => { setMode(m => m === "login" ? "signup" : "login"); setError(""); }}
+            style={{ background: "transparent", border: "none", color: "rgba(160,160,200,0.85)", fontSize: "0.82rem", fontFamily: "Georgia, serif", cursor: "pointer", textDecoration: "underline" }}>
+            {mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
+          </button>
+        </div>
 
-      <div style={{ color: "#444466", fontSize: "0.68rem", marginTop: "2.5rem", textAlign: "center" }}>
-        No email required. Your username and password are all you need.
+        <div style={{ color: "rgba(120,120,160,0.75)", fontSize: "0.68rem", marginTop: "2.5rem", textAlign: "center" }}>
+          No email required. Your username and password are all you need.
+        </div>
       </div>
     </div>
   );
@@ -459,7 +474,7 @@ function EditModal({ item, sections, onSave, onClose, theme: T, listType }) {
 }
 
 // ─────────────────────────────────────────────
-// ITEM ROW
+// ITEM ROW — compact, genre tags inline with title
 // ─────────────────────────────────────────────
 function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, isArchive }) {
   const [expanded, setExpanded] = useState(false);
@@ -484,58 +499,97 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
   const genreList = item.genres?.length ? item.genres : item.genre ? [item.genre] : [];
 
   return (
-    <div style={{ background: T.bgCard, border: `1px solid ${done ? T.borderLight : T.border}`, borderRadius: 8, marginBottom: "0.35rem", overflow: "hidden", opacity: done ? 0.68 : 1, transition: "opacity 0.2s" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", padding: "0.65rem 0.85rem" }}>
+    <div style={{
+      background: T.bgCard,
+      border: `1px solid ${done ? T.borderLight : T.border}`,
+      borderRadius: 7,
+      marginBottom: "0.25rem",
+      overflow: "hidden",
+      opacity: done ? 0.68 : 1,
+      transition: "opacity 0.2s",
+    }}>
+      {/* ── Compact single-line row ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.42rem 0.75rem" }}>
+        {/* Status dot */}
         <button onClick={() => !isArchive && onCycle(item.id)}
-          style={{ width: 18, height: 18, borderRadius: "50%", flexShrink: 0, border: "none", cursor: isArchive ? "default" : "pointer",
+          style={{
+            width: 14, height: 14, borderRadius: "50%", flexShrink: 0, border: "none",
+            cursor: isArchive ? "default" : "pointer",
             background: done ? T.accent : wip ? T.textMid : T.borderLight,
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.5rem", color: "#fff", fontWeight: "bold", transition: "transform 0.15s" }}
-          onMouseEnter={e => { if (!isArchive) e.currentTarget.style.transform = "scale(1.2)"; }}
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "0.4rem", color: "#fff", fontWeight: "bold", transition: "transform 0.15s",
+          }}
+          onMouseEnter={e => { if (!isArchive) e.currentTarget.style.transform = "scale(1.25)"; }}
           onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
         >{done ? "✓" : wip ? "▶" : ""}</button>
 
+        {/* Title + author + genre tags — all on one line, wrapping only if needed */}
         <button onClick={handleExpand} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0, minWidth: 0 }}>
-          <div style={{ fontSize: "0.88rem", color: done ? T.textMuted : T.text, textDecoration: done ? "line-through" : "none", fontFamily: T.font, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {item.title}
+          <div style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: "0.3rem", lineHeight: 1.3 }}>
+            <span style={{
+              fontSize: "0.85rem",
+              color: done ? T.textMuted : T.text,
+              textDecoration: done ? "line-through" : "none",
+              fontFamily: T.font,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "100%",
+            }}>{item.title}</span>
+
+            {item.author && (
+              <span style={{ fontSize: "0.65rem", color: T.textMuted, fontStyle: "italic", whiteSpace: "nowrap" }}>by {item.author}</span>
+            )}
+
+            {/* Genre tags inline */}
+            {genreList.map(g => (
+              <span key={g} style={{
+                fontSize: "0.56rem",
+                background: T.sectionBg,
+                border: `1px solid ${T.sectionBorder}`,
+                borderRadius: 10,
+                color: T.textMuted,
+                padding: "0.06rem 0.38rem",
+                letterSpacing: "0.03em",
+                whiteSpace: "nowrap",
+              }}>{g}</span>
+            ))}
           </div>
-          {item.author && (
-            <div style={{ fontSize: "0.68rem", color: T.textMuted, marginTop: "0.1rem", fontStyle: "italic" }}>by {item.author}</div>
-          )}
-          {genreList.length > 0 && (
-            <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap", marginTop: "0.2rem" }}>
-              {genreList.map(g => (
-                <span key={g} style={{ fontSize: "0.58rem", background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: 10, color: T.textMuted, padding: "0.08rem 0.4rem", letterSpacing: "0.04em" }}>{g}</span>
-              ))}
-            </div>
-          )}
         </button>
 
+        {/* Rating stars (if rated) */}
         {done && item.rating > 0 && (
-          <span style={{ fontSize: "0.7rem", color: T.accent, letterSpacing: 1, flexShrink: 0 }}>{"★".repeat(item.rating)}</span>
+          <span style={{ fontSize: "0.65rem", color: T.accent, letterSpacing: 1, flexShrink: 0 }}>{"★".repeat(item.rating)}</span>
         )}
+        {/* Rate button (if done but unrated) */}
         {done && item.rating === 0 && (
-          <button onClick={() => onRateRequest(item)} style={{ background: "transparent", border: `1px solid ${T.borderLight}`, borderRadius: 4, color: T.textMuted, padding: "0.13rem 0.45rem", fontSize: "0.65rem", fontFamily: T.font, cursor: "pointer", flexShrink: 0 }}>Rate</button>
+          <button onClick={() => onRateRequest(item)} style={{ background: "transparent", border: `1px solid ${T.borderLight}`, borderRadius: 4, color: T.textMuted, padding: "0.1rem 0.38rem", fontSize: "0.6rem", fontFamily: T.font, cursor: "pointer", flexShrink: 0 }}>Rate</button>
         )}
-        <button onClick={() => onEdit(item)} style={{ background: "transparent", border: "none", color: T.textFaint, cursor: "pointer", fontSize: "0.8rem", flexShrink: 0, lineHeight: 1, padding: "0 0.1rem", transition: "color 0.15s" }}
+
+        {/* Edit */}
+        <button onClick={() => onEdit(item)} style={{ background: "transparent", border: "none", color: T.textFaint, cursor: "pointer", fontSize: "0.75rem", flexShrink: 0, lineHeight: 1, padding: "0 0.08rem", transition: "color 0.15s" }}
           onMouseEnter={e => e.currentTarget.style.color = T.accent}
           onMouseLeave={e => e.currentTarget.style.color = T.textFaint}
           title="Edit"
         >✎</button>
-        <button onClick={() => onRemove(item.id)} style={{ background: "transparent", border: "none", color: T.borderLight, cursor: "pointer", fontSize: "0.95rem", flexShrink: 0, lineHeight: 1, padding: "0 0.1rem", transition: "color 0.15s" }}
+
+        {/* Remove */}
+        <button onClick={() => onRemove(item.id)} style={{ background: "transparent", border: "none", color: T.borderLight, cursor: "pointer", fontSize: "0.9rem", flexShrink: 0, lineHeight: 1, padding: "0 0.08rem", transition: "color 0.15s" }}
           onMouseEnter={e => e.currentTarget.style.color = T.danger}
           onMouseLeave={e => e.currentTarget.style.color = T.borderLight}
         >×</button>
       </div>
 
+      {/* Expanded panel */}
       {expanded && (
-        <div style={{ padding: "0 0.85rem 0.7rem", borderTop: `1px solid ${T.borderLight}` }}>
+        <div style={{ padding: "0 0.75rem 0.65rem", borderTop: `1px solid ${T.borderLight}` }}>
           {item.notes && <div style={{ fontSize: "0.7rem", color: T.textMuted, marginTop: "0.4rem", fontStyle: "italic" }}>{item.notes}</div>}
           <div style={{ fontSize: "0.75rem", color: T.textMid, marginTop: "0.4rem", lineHeight: 1.55 }}>
             {loadingDesc ? "Fetching description…" : desc || <span style={{ color: T.textFaint }}>No description available.</span>}
           </div>
           {!isArchive && (
             <button onClick={() => onCycle(item.id)}
-              style={{ marginTop: "0.6rem", background: "transparent", border: `1px solid ${T.border}`, borderRadius: 4, color: T.textMid, padding: "0.25rem 0.65rem", fontSize: "0.72rem", fontFamily: T.font, cursor: "pointer" }}>
+              style={{ marginTop: "0.55rem", background: "transparent", border: `1px solid ${T.border}`, borderRadius: 4, color: T.textMid, padding: "0.22rem 0.6rem", fontSize: "0.7rem", fontFamily: T.font, cursor: "pointer" }}>
               {wip ? "✓ Mark as done" : done ? "↩ Move back" : "▶ Mark in progress"}
             </button>
           )}
@@ -548,23 +602,21 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
 // ─────────────────────────────────────────────
 // GENRE SECTION
 // ─────────────────────────────────────────────
-
 function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, isArchive }) {
   const [open, setOpen] = useState(true);
   if (items.length === 0) return null;
 
-  // Sort by rating (5 stars first), then by date added
   const sortedItems = [...items].sort((a, b) => {
     if (b.rating !== a.rating) return (b.rating || 0) - (a.rating || 0);
     return b.added - a.added;
   });
 
   return (
-    <div style={{ marginBottom: "0.5rem" }}>
-      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: "transparent", border: "none", cursor: "pointer", padding: "0.28rem 0", textAlign: "left" }}>
-        <span style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.1em", color: T.textMuted, fontFamily: T.font }}>{genre}</span>
+    <div style={{ marginBottom: "0.4rem" }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: "transparent", border: "none", cursor: "pointer", padding: "0.22rem 0", textAlign: "left" }}>
+        <span style={{ fontSize: "0.58rem", textTransform: "uppercase", letterSpacing: "0.1em", color: T.textMuted, fontFamily: T.font }}>{genre}</span>
         <span style={{ flex: 1, height: 1, background: T.borderLight }} />
-        <span style={{ fontSize: "0.62rem", color: T.textFaint }}>{items.length} {open ? "▲" : "▼"}</span>
+        <span style={{ fontSize: "0.58rem", color: T.textFaint }}>{items.length} {open ? "▲" : "▼"}</span>
       </button>
       {open && sortedItems.map(item => (
         <ItemRow key={item.id} item={item} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} isArchive={isArchive} />
@@ -574,18 +626,17 @@ function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, 
 }
 
 // ─────────────────────────────────────────────
-// MAIN SECTION
+// MAIN SECTION (used for To Watch/Read AND Watching/Reading AND Watched/Read)
 // ─────────────────────────────────────────────
 function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, search, statusFilter, isArchive }) {
   const [open, setOpen] = useState(true);
-  
-  // Only show items that match the section AND the status (unwatched vs watched)
+
   const filtered = items.filter(i =>
     i.section === sectionKey && i.status === statusFilter &&
     (i.title.toLowerCase().includes(search.toLowerCase()) ||
      (i.author && i.author.toLowerCase().includes(search.toLowerCase())))
   );
-  
+
   if (filtered.length === 0) return null;
 
   const byGenre = {};
@@ -598,15 +649,15 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
   });
 
   return (
-    <div style={{ marginBottom: "1rem" }}>
-      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: 8, padding: "0.5rem 0.85rem", cursor: "pointer", marginBottom: open ? "0.45rem" : 0 }}>
-        <span style={{ fontSize: "0.95rem" }}>{sectionDef.icon}</span>
-        <span style={{ fontSize: "0.85rem", fontFamily: T.headerFont, color: T.text, fontWeight: "bold" }}>{sectionKey}</span>
-        <span style={{ fontSize: "0.7rem", color: T.textMuted }}>({filtered.length})</span>
-        <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: T.textMuted }}>{open ? "▲" : "▼"}</span>
+    <div style={{ marginBottom: "0.85rem" }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: 7, padding: "0.42rem 0.75rem", cursor: "pointer", marginBottom: open ? "0.4rem" : 0 }}>
+        <span style={{ fontSize: "0.9rem" }}>{sectionDef.icon}</span>
+        <span style={{ fontSize: "0.82rem", fontFamily: T.headerFont, color: T.text, fontWeight: "bold" }}>{sectionKey}</span>
+        <span style={{ fontSize: "0.67rem", color: T.textMuted }}>({filtered.length})</span>
+        <span style={{ marginLeft: "auto", fontSize: "0.65rem", color: T.textMuted }}>{open ? "▲" : "▼"}</span>
       </button>
       {open && (
-        <div style={{ paddingLeft: "0.4rem" }}>
+        <div style={{ paddingLeft: "0.35rem" }}>
           {sectionDef.genres.map(g => (
             <GenreSection key={g} genre={g} items={byGenre[g] || []} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} isArchive={isArchive} />
           ))}
@@ -616,24 +667,8 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
   );
 }
 
-
 // ─────────────────────────────────────────────
-// ARCHIVE SECTION
-// ─────────────────────────────────────────────
-function ArchiveSection({ items, onCycle, onRateRequest, onRemove, onEdit, onDescUpdate, theme: T, title, emptyMsg, canCycle }) {
-  if (items.length === 0) return <div style={{ color: T.textFaint, fontSize: "0.85rem", padding: "2.5rem 0", textAlign: "center" }}>{emptyMsg}</div>;
-  return (
-    <div>
-      <div style={{ fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.1em", color: T.textMuted, marginBottom: "0.75rem" }}>{title} — {items.length}</div>
-      {items.map(item => (
-        <ItemRow key={item.id} item={item} onCycle={canCycle ? onCycle : () => {}} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} isArchive={!canCycle} />
-      ))}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// ADD FORM with autocomplete & toggle
+// ADD FORM
 // ─────────────────────────────────────────────
 function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
   const [title, setTitle]             = useState("");
@@ -643,7 +678,7 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
   const [showSugg, setShowSugg]       = useState(false);
   const [loadingSugg, setLoadingSugg] = useState(false);
   const [syncToOther, setSyncToOther] = useState(false);
-  
+
   const inputRef = useRef(null);
   const suggTimer = useRef(null);
 
@@ -705,20 +740,12 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
           style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${T.borderLight}`, color: T.text, padding: "0.3rem 0", fontSize: "0.88rem", fontFamily: T.font, outline: "none", marginBottom: "0.75rem", boxSizing: "border-box", fontStyle: "italic" }}
         />
       )}
-      
-      {/* NEW TOGGLE FEATURE */}
       <div style={{ marginBottom: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-         <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer", fontSize: "0.72rem", color: T.textMuted }}>
-           <input 
-             type="checkbox" 
-             checked={syncToOther} 
-             onChange={e => setSyncToOther(e.target.checked)}
-             style={{ cursor: "pointer", accentColor: T.accent }}
-           />
-           Also add to {listType === "watch" ? "Reading List" : "Movie List"}?
-         </label>
+        <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer", fontSize: "0.72rem", color: T.textMuted }}>
+          <input type="checkbox" checked={syncToOther} onChange={e => setSyncToOther(e.target.checked)} style={{ cursor: "pointer", accentColor: T.accent }} />
+          Also add to {listType === "watch" ? "Reading List" : "Movie List"}?
+        </label>
       </div>
-
       {detecting && <div style={{ fontSize: "0.75rem", color: T.textMuted, marginBottom: "0.5rem" }}>✨ Auto-detecting genre…</div>}
       <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", marginTop: "0.75rem" }}>
         <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, color: T.textMuted, padding: "0.3rem 0.85rem", fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer" }}>Cancel</button>
@@ -732,7 +759,7 @@ function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
 }
 
 // ─────────────────────────────────────────────
-// LIST PAGE
+// LIST PAGE — status sub-tabs at top, section/genre layout for all tabs
 // ─────────────────────────────────────────────
 function ListPage({ userId, listType, sections, theme: T, profileName }) {
   const todoStatus = listType === "watch" ? "unwatched" : "unread";
@@ -773,25 +800,15 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
   const addItem = async ({ title, section, genres, genre, desc, author }, alsoAddToOther = false) => {
     const id = Date.now();
     const newItem = { id, title, section, genre: genre || genres?.[0] || "Other", genres: genres || [], notes: "", status: todoStatus, added: id, desc: desc || "", rating: 0, _listType: listType, author: author || "" };
-    
-    // Add to current list
     await dbAddItem(userId, newItem, listType);
     setItems(prev => [newItem, ...prev]);
-
-    // HANDLE TOGGLE SYNC
     if (alsoAddToOther) {
-       const otherType = listType === "watch" ? "read" : "watch";
-       const otherTodoStatus = otherType === "read" ? "unread" : "unwatched";
-       // Auto-detect genre settings for the other medium
-       const detected = await autoDetectGenre(title, otherType);
-       const syncedItem = { 
-         id: id + 1, title, author: author || "", 
-         ...detected, genre: detected.genres?.[0] || "Other", 
-         notes: "Auto-synced from other list", status: otherTodoStatus, added: id + 1, rating: 0, _listType: otherType 
-       };
-       await dbAddItem(userId, syncedItem, otherType);
+      const otherType = listType === "watch" ? "read" : "watch";
+      const otherTodoStatus = otherType === "read" ? "unread" : "unwatched";
+      const detected = await autoDetectGenre(title, otherType);
+      const syncedItem = { id: id + 1, title, author: author || "", ...detected, genre: detected.genres?.[0] || "Other", notes: "Auto-synced from other list", status: otherTodoStatus, added: id + 1, rating: 0, _listType: otherType };
+      await dbAddItem(userId, syncedItem, otherType);
     }
-
     setAdding(false);
   };
 
@@ -813,31 +830,49 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
     if (updatedItem) await dbUpdateItem(userId, updatedItem, listType);
   }, [userId, listType]);
 
-  const wipItems  = items.filter(i => i.status === wipStatus);
-  const doneItems = items.filter(i => i.status === doneStatus);
   const todoCount = items.filter(i => i.status === todoStatus).length;
+  const wipCount  = items.filter(i => i.status === wipStatus).length;
+  const doneCount = items.filter(i => i.status === doneStatus).length;
 
   const subTabs = [
-    { key: "list", label: listType === "watch" ? "🎬 To Watch" : "📖 To Read",  count: todoCount },
-    { key: "wip",  label: listType === "watch" ? "▶ Watching"  : "📗 Reading",  count: wipItems.length },
-    { key: "done", label: listType === "watch" ? "✓ Watched"   : "✓ Read",      count: doneItems.length },
+    { key: "list", label: listType === "watch" ? "To Watch" : "To Read",  count: todoCount },
+    { key: "wip",  label: listType === "watch" ? "Watching"  : "Reading",  count: wipCount },
+    { key: "done", label: listType === "watch" ? "Watched"   : "Read",     count: doneCount },
   ];
 
   if (loading) return <div style={{ color: T.textFaint, padding: "2rem 0", textAlign: "center" }}>Loading…</div>;
 
+  // Active tab style: tab sits flush against content, no bottom border
+  const tabStyle = (active) => ({
+    background: active ? T.bg : "transparent",
+    border: `1px solid ${active ? T.border : "transparent"}`,
+    borderBottom: active ? `1px solid ${T.bg}` : `1px solid ${T.border}`,
+    borderRadius: "6px 6px 0 0",
+    color: active ? T.accent : T.textMuted,
+    padding: "0.38rem 0.9rem",
+    fontSize: "0.76rem",
+    fontFamily: T.font,
+    cursor: "pointer",
+    fontWeight: active ? "bold" : "normal",
+    position: "relative",
+    bottom: -1,
+    transition: "all 0.12s",
+    whiteSpace: "nowrap",
+  });
+
   return (
-    <div>
-      <div style={{ display: "flex", gap: "0.3rem", marginBottom: "1.2rem", flexWrap: "wrap", alignItems: "center" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Sub-tab bar */}
+      <div style={{ display: "flex", alignItems: "flex-end", borderBottom: `1px solid ${T.border}`, marginBottom: "1rem", gap: "0.15rem" }}>
         {subTabs.map(t => (
-          <button key={t.key} onClick={() => setSubTab(t.key)} style={{
-            background: subTab === t.key ? T.pillOn : T.pillOff,
-            border: `1px solid ${subTab === t.key ? T.pillOn : T.border}`,
-            borderRadius: 20, color: subTab === t.key ? T.pillOnText : T.pillOffText,
-            padding: "0.3rem 0.9rem", fontSize: "0.77rem", fontFamily: T.font, cursor: "pointer", transition: "all 0.15s",
-          }}>{t.label}{t.count > 0 && <span style={{ opacity: 0.7 }}> ({t.count})</span>}</button>
+          <button key={t.key} onClick={() => { setSubTab(t.key); setSearch(""); }} style={tabStyle(subTab === t.key)}>
+            {t.label}
+            {t.count > 0 && <span style={{ opacity: 0.65, fontSize: "0.7rem", marginLeft: "0.25rem" }}>({t.count})</span>}
+          </button>
         ))}
-        <div style={{ marginLeft: "auto", position: "relative" }}>
-          <button onClick={() => setShowDownload(s => !s)} style={{ background: T.sectionBg, border: `1px solid ${T.border}`, borderRadius: 20, color: T.textMuted, padding: "0.3rem 0.75rem", fontSize: "0.72rem", fontFamily: T.font, cursor: "pointer" }}>
+        {/* Export pushed to right */}
+        <div style={{ marginLeft: "auto", position: "relative", paddingBottom: 1 }}>
+          <button onClick={() => setShowDownload(s => !s)} style={{ background: T.sectionBg, border: `1px solid ${T.border}`, borderRadius: 6, color: T.textMuted, padding: "0.28rem 0.65rem", fontSize: "0.68rem", fontFamily: T.font, cursor: "pointer" }}>
             ⬇ Export
           </button>
           {showDownload && (
@@ -856,15 +891,23 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
           )}
         </div>
       </div>
+
+      {/* Tab content */}
+      {(subTab === "list" || subTab === "done") && (
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.85rem" }}>
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={subTab === "list" ? "Search titles…" : "Search finished…"}
+            style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.35rem 0.65rem", fontSize: "0.82rem", fontFamily: T.font, outline: "none" }} />
+        </div>
+      )}
+
       {subTab === "list" && (
         <>
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search titles..."
-              style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.38rem 0.7rem", fontSize: "0.83rem", fontFamily: T.font, outline: "none" }} />
-          </div>
           {adding
             ? <AddForm sections={sections} onAdd={addItem} onClose={() => setAdding(false)} theme={T} listType={listType} />
-            : <button onClick={() => setAdding(true)} style={{ width: "100%", background: "transparent", border: `1px dashed ${T.border}`, borderRadius: 8, color: T.textMuted, padding: "0.72rem", fontSize: "0.85rem", fontFamily: T.font, cursor: "pointer", marginBottom: "1rem" }}>+ Add {listType === "watch" ? "title" : "book"}</button>
+            : <button onClick={() => setAdding(true)} style={{ width: "100%", background: "transparent", border: `1px dashed ${T.border}`, borderRadius: 7, color: T.textMuted, padding: "0.6rem", fontSize: "0.83rem", fontFamily: T.font, cursor: "pointer", marginBottom: "0.85rem" }}>
+                + Add {listType === "watch" ? "title" : "book"}
+              </button>
           }
           {Object.entries(sections).map(([key, def]) => (
             <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} statusFilter={todoStatus} isArchive={false} />
@@ -873,21 +916,36 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
       )}
 
       {subTab === "wip" && (
-        <ArchiveSection items={wipItems} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} theme={T} title={listType === "watch" ? "Currently Watching" : "Currently Reading"} />
+        // Watching/Reading — same section/genre layout as To Watch/To Read
+        <>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.85rem" }}>
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder={listType === "watch" ? "Search watching…" : "Search reading…"}
+              style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.35rem 0.65rem", fontSize: "0.82rem", fontFamily: T.font, outline: "none" }} />
+          </div>
+          {Object.entries(sections).map(([key, def]) => (
+            <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} statusFilter={wipStatus} isArchive={false} />
+          ))}
+          {items.filter(i => i.status === wipStatus).length === 0 && (
+            <div style={{ color: T.textFaint, fontSize: "0.85rem", padding: "2.5rem 0", textAlign: "center" }}>
+              Nothing {listType === "watch" ? "being watched" : "being read"} right now.
+            </div>
+          )}
+        </>
       )}
 
       {subTab === "done" && (
         <>
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search finished..."
-              style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.38rem 0.7rem", fontSize: "0.83rem", fontFamily: T.font, outline: "none" }} />
-          </div>
           {Object.entries(sections).map(([key, def]) => (
             <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} statusFilter={doneStatus} isArchive={true} />
           ))}
+          {items.filter(i => i.status === doneStatus).length === 0 && (
+            <div style={{ color: T.textFaint, fontSize: "0.85rem", padding: "2.5rem 0", textAlign: "center" }}>
+              Nothing {listType === "watch" ? "watched" : "read"} yet.
+            </div>
+          )}
         </>
       )}
-
 
       {ratingItem && <RatingModal item={ratingItem} onRate={r => rateItem(ratingItem.id, r)} onClose={() => setRatingItem(null)} theme={T} />}
       {editingItem && <EditModal item={editingItem} sections={sections} onSave={changes => saveEdit(editingItem.id, changes)} onClose={() => setEditingItem(null)} theme={T} listType={listType} />}
@@ -899,37 +957,14 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
 // ─────────────────────────────────────────────
 // PROFILE SELECT PAGE
 // ─────────────────────────────────────────────
-function ProfileSelectPage({ profiles, onSelect, onAdd, onEdit, onDelete, theme: T }) {
-    const [newName, setNewName] = useState("");
+function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange, onLogout }) {
+  const [newName, setNewName] = useState("");
   const [addingProfile, setAddingProfile] = useState(false);
   const [editingTheme, setEditingTheme] = useState(null);
   const [showManual, setShowManual] = useState(false);
   const inputRef = useRef(null);
 
   return (
-    <div style={{ 
-      minHeight: "100vh", 
-      display: "flex", 
-      flexDirection: "column", 
-      alignItems: "center", 
-      justifyContent: "center", 
-      padding: "2rem",
-      backgroundImage: "url('/Icon.png')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-      position: "relative"
-    }}>
-      {/* Dark Overlay for Readability */}
-      <div style={{ 
-        position: "absolute", 
-        inset: 0, 
-        backgroundColor: "rgba(0, 0, 0, 0.5)", 
-        zIndex: 0 
-      }} />
-
-      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: "400px", textAlign: "center" }}>
-
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Georgia, serif" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
       <div style={{ color: "#E0D4FF", fontSize: "2rem", marginBottom: "0.3rem", letterSpacing: "0.08em" }}>✦ Lists</div>
@@ -937,16 +972,16 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onEdit, onDelete, theme:
 
       <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "2.5rem" }}>
         {profiles.map(u => {
-          const T = THEMES[u.theme] || THEMES.beautyandthebeast;
+          const Th = THEMES[u.theme] || THEMES.beautyandthebeast;
           return (
             <div key={u.id} style={{ position: "relative" }}>
               <button onClick={() => onSelect(u.id)} style={{ width: 130, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "1.5rem 1rem", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.6rem", transition: "all 0.2s" }}
                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.transform = "translateY(0)"; }}
               >
-                <div style={{ width: 54, height: 54, borderRadius: "50%", background: T.bgHeader, border: `2px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{u.avatar}</div>
+                <div style={{ width: 54, height: 54, borderRadius: "50%", background: Th.bgHeader, border: `2px solid ${Th.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{u.avatar}</div>
                 <div style={{ color: "#E0D4FF", fontSize: "0.88rem" }}>{u.name}</div>
-                <div style={{ color: "#8888BB", fontSize: "0.62rem", letterSpacing: "0.08em" }}>{T.emoji} {T.name.split(" ").slice(0,2).join(" ")}</div>
+                <div style={{ color: "#8888BB", fontSize: "0.62rem", letterSpacing: "0.08em" }}>{Th.emoji} {Th.name.split(" ").slice(0,2).join(" ")}</div>
               </button>
               <div style={{ display: "flex", gap: "0.3rem", justifyContent: "center", marginTop: "0.5rem" }}>
                 <button onClick={() => setEditingTheme(editingTheme === u.id ? null : u.id)}
@@ -995,19 +1030,15 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onEdit, onDelete, theme:
       </div>
 
       <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-        <button onClick={onLogout} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: "#6666AA", padding: "0.4rem 1.2rem", fontSize: "0.78rem", fontFamily: "Georgia, serif", cursor: "pointer" }}>
-          Log out
-        </button>
-        <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: "none", color: "#6677BB", fontSize: "0.75rem", fontFamily: "Georgia, serif", cursor: "pointer", textDecoration: "underline" }}>
-          Help / Manual
-        </button>
+        <button onClick={onLogout} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: "#6666AA", padding: "0.4rem 1.2rem", fontSize: "0.78rem", fontFamily: "Georgia, serif", cursor: "pointer" }}>Log out</button>
+        <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: "none", color: "#6677BB", fontSize: "0.75rem", fontFamily: "Georgia, serif", cursor: "pointer", textDecoration: "underline" }}>Help / Manual</button>
       </div>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────
-// ROOT APP
+// ROOT APP — left sidebar for Watch/Read, no outer border
 // ─────────────────────────────────────────────
 export default function App() {
   const [authUser, setAuthUser]           = useState(undefined);
@@ -1017,15 +1048,13 @@ export default function App() {
   const [showSwitch, setShowSwitch]       = useState(false);
   const [showManual, setShowManual]       = useState(false);
 
-   useEffect(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setAuthUser(session?.user || null);
     });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user || null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -1081,75 +1110,104 @@ export default function App() {
   const T = THEMES[profile.theme] || THEMES.beautyandthebeast;
 
   const mainTabs = [
-    { key: "watch",   label: "🎬 Watch" },
-    { key: "read",    label: "📚 Read" },
+    { key: "watch", label: "🎬 Watch" },
+    { key: "read",  label: "📚 Read" },
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, color: T.text }}>
+    // No margin/padding on root — full bleed, no border
+    <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, color: T.text, display: "flex", flexDirection: "column" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
 
-      <div style={{ background: T.bgHeader, borderBottom: `1px solid ${T.border}`, padding: "1.1rem 1.5rem 0", position: "sticky", top: 0, zIndex: 20 }}>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.9rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-              <span style={{ fontSize: "1.2rem" }}>{profile.avatar}</span>
-              <span style={{ fontSize: "0.95rem", fontFamily: T.headerFont, color: "#fff", fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <button onClick={() => setShowManual(true)} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20, padding: "0.28rem 0.65rem", fontSize: "0.7rem", fontFamily: T.font, color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>?</button>
-              <div style={{ position: "relative" }}>
-                <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "0.28rem 0.75rem", fontSize: "0.73rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                  <span>⇄</span><span>Switch</span>
-                </button>
-                {showSwitch && (
-                  <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.5rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0.5rem", zIndex: 100, minWidth: 160, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
-                    {profiles.map(p => (
-                      <button key={p.id} onClick={() => { setActiveProfile(p.id); setShowSwitch(false); setMainTab("watch"); }}
-                        style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: p.id === activeProfile ? T.sectionBg : "transparent", border: "none", borderRadius: 6, padding: "0.42rem 0.6rem", cursor: "pointer", color: T.text, fontSize: "0.82rem", fontFamily: T.font, marginBottom: "0.12rem" }}>
-                        <span>{p.avatar}</span><span>{p.name}</span>
-                      </button>
-                    ))}
-                    <div style={{ borderTop: `1px solid ${T.borderLight}`, marginTop: "0.3rem", paddingTop: "0.3rem" }}>
-                      <button onClick={() => { setActiveProfile(null); setShowSwitch(false); }}
-                        style={{ width: "100%", background: "transparent", border: "none", borderRadius: 6, padding: "0.38rem 0.6rem", cursor: "pointer", color: T.textMuted, fontSize: "0.73rem", fontFamily: T.font, textAlign: "left" }}>
-                        👥 Manage profiles
-                      </button>
-                      <button onClick={() => { handleLogout(); setShowSwitch(false); }}
-                        style={{ width: "100%", background: "transparent", border: "none", borderRadius: 6, padding: "0.38rem 0.6rem", cursor: "pointer", color: T.textMuted, fontSize: "0.73rem", fontFamily: T.font, textAlign: "left" }}>
-                        🚪 Log out
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+      {/* ── HEADER ── */}
+      <div style={{ background: T.bgHeader, padding: "0.75rem 1.2rem", position: "sticky", top: 0, zIndex: 20, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+            <span style={{ fontSize: "1.15rem" }}>{profile.avatar}</span>
+            <span style={{ fontSize: "0.92rem", fontFamily: T.headerFont, color: "#fff", fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
           </div>
-
-          <div style={{ display: "flex", gap: "0.2rem" }}>
-            {mainTabs.map(t => (
-              <button key={t.key} onClick={() => setMainTab(t.key)} style={{
-                background: mainTab === t.key ? T.bg : "transparent",
-                border: `1px solid ${mainTab === t.key ? T.border : "rgba(255,255,255,0.3)"}`,
-                borderBottom: mainTab === t.key ? `1px solid ${T.bg}` : "1px solid rgba(255,255,255,0.3)",
-                borderRadius: "7px 7px 0 0",
-                color: mainTab === t.key ? T.accent : "rgba(255,255,255,0.8)",
-                padding: "0.38rem 0.95rem", fontSize: "0.78rem", fontFamily: T.font,
-                cursor: "pointer", marginRight: "0.2rem",
-                fontWeight: mainTab === t.key ? "bold" : "normal",
-                position: "relative", bottom: -1, transition: "all 0.15s",
-              }}>{t.label}</button>
-            ))}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+            <button onClick={() => setShowManual(true)} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20, padding: "0.25rem 0.6rem", fontSize: "0.68rem", fontFamily: T.font, color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>?</button>
+            <div style={{ position: "relative" }}>
+              <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "0.25rem 0.7rem", fontSize: "0.7rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                <span>⇄</span><span>Switch</span>
+              </button>
+              {showSwitch && (
+                <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.5rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0.5rem", zIndex: 100, minWidth: 160, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+                  {profiles.map(p => (
+                    <button key={p.id} onClick={() => { setActiveProfile(p.id); setShowSwitch(false); setMainTab("watch"); }}
+                      style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: p.id === activeProfile ? T.sectionBg : "transparent", border: "none", borderRadius: 6, padding: "0.42rem 0.6rem", cursor: "pointer", color: T.text, fontSize: "0.82rem", fontFamily: T.font, marginBottom: "0.12rem" }}>
+                      <span>{p.avatar}</span><span>{p.name}</span>
+                    </button>
+                  ))}
+                  <div style={{ borderTop: `1px solid ${T.borderLight}`, marginTop: "0.3rem", paddingTop: "0.3rem" }}>
+                    <button onClick={() => { setActiveProfile(null); setShowSwitch(false); }}
+                      style={{ width: "100%", background: "transparent", border: "none", borderRadius: 6, padding: "0.38rem 0.6rem", cursor: "pointer", color: T.textMuted, fontSize: "0.73rem", fontFamily: T.font, textAlign: "left" }}>
+                      👥 Manage profiles
+                    </button>
+                    <button onClick={() => { handleLogout(); setShowSwitch(false); }}
+                      style={{ width: "100%", background: "transparent", border: "none", borderRadius: 6, padding: "0.38rem 0.6rem", cursor: "pointer", color: T.textMuted, fontSize: "0.73rem", fontFamily: T.font, textAlign: "left" }}>
+                      🚪 Log out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "1.4rem 1.2rem 5rem" }}>
-        {mainTab === "watch"   && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
-        {mainTab === "read"    && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} profileName={profile.name} />}
+      {/* ── BODY: left sidebar + content ── */}
+      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+
+        {/* Left sidebar — Watch / Read */}
+        <div style={{
+          width: 72,
+          flexShrink: 0,
+          background: T.bgHeader,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          paddingTop: "1.2rem",
+          gap: "0.25rem",
+          borderRight: `1px solid ${T.border}`,
+        }}>
+          {mainTabs.map(t => {
+            const active = mainTab === t.key;
+            return (
+              <button key={t.key} onClick={() => setMainTab(t.key)} style={{
+                width: "100%",
+                background: active ? T.bg : "transparent",
+                border: "none",
+                borderLeft: active ? `3px solid ${T.accent}` : "3px solid transparent",
+                borderRight: "none",
+                color: active ? T.accent : "rgba(255,255,255,0.6)",
+                padding: "0.7rem 0",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.28rem",
+                fontSize: "1.2rem",
+                transition: "all 0.15s",
+              }}>
+                <span>{t.label.split(" ")[0]}</span>
+                <span style={{ fontSize: "0.55rem", fontFamily: T.font, letterSpacing: "0.04em", opacity: active ? 1 : 0.7 }}>
+                  {t.label.split(" ").slice(1).join(" ")}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Main content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "1.2rem 1.1rem 4rem" }}>
+          {mainTab === "watch" && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
+          {mainTab === "read"  && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} profileName={profile.name} />}
+        </div>
       </div>
 
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
   );
-                                      }
+}
