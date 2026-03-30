@@ -1172,13 +1172,13 @@ export default function App() {
 
         {/* Left sidebar — Watch / Read */}
         <div style={{
-          width: 60,
+          width: 40,
           flexShrink: 0,
           background: T.bgHeader,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: "1.2rem",
+          paddingTop: "6.2rem",
           gap: "0.25rem",
           borderRight: `1px solid ${T.border}`,
         }}>
@@ -1186,7 +1186,7 @@ export default function App() {
             const active = mainTab === t.key;
             return (
               <button key={t.key} onClick={() => setMainTab(t.key)} style={{
-                width: "90%",
+                width: "100%",
                 background: active ? T.bg : "transparent",
                 border: "none",
                 borderLeft: active ? `3px solid ${T.accent}` : "3px solid transparent",
