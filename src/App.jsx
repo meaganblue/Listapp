@@ -962,8 +962,21 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
   const inputRef = useRef(null);
 
   return (
-    <div style={{ minHeight: "100vh", backgroundImage: "url('/Icon.png')", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Georgia, serif", position: "relative" }}>
-      {/* Dark overlay */}
+      <div style={{
+      minHeight: "100vh",
+      backgroundImage: "url('/Icon.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem",
+      fontFamily: "Georgia, serif",
+      position: "relative",
+    }}>
+      {/* Dark overlay for readability */}
       <div style={{ position: "absolute", inset: 0, background: "rgba(10,8,20,0.62)", backdropFilter: "blur(1px)", zIndex: 0 }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
