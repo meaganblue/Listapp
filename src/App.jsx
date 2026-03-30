@@ -870,27 +870,7 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
             {t.count > 0 && <span style={{ opacity: 0.65, fontSize: "0.7rem", marginLeft: "0.25rem" }}>({t.count})</span>}
           </button>
         ))}
-        {/* Export pushed to right */}
-        <div style={{ marginLeft: "auto", position: "relative", paddingBottom: 1 }}>
-          <button onClick={() => setShowDownload(s => !s)} style={{ background: T.sectionBg, border: `1px solid ${T.border}`, borderRadius: 6, color: T.textMuted, padding: "0.28rem 0.65rem", fontSize: "0.68rem", fontFamily: T.font, cursor: "pointer" }}>
-            ⬇ Export
-          </button>
-          {showDownload && (
-            <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.4rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, padding: "0.4rem", zIndex: 50, minWidth: 130, boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }}>
-              <button onClick={() => { downloadCSV(items, listType, profileName); setShowDownload(false); }}
-                style={{ width: "100%", background: "transparent", border: "none", padding: "0.4rem 0.6rem", color: T.text, fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer", textAlign: "left", borderRadius: 5 }}
-                onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
-                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-              >📊 Download CSV</button>
-              <button onClick={() => { downloadTXT(items, listType, profileName); setShowDownload(false); }}
-                style={{ width: "100%", background: "transparent", border: "none", padding: "0.4rem 0.6rem", color: T.text, fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer", textAlign: "left", borderRadius: 5 }}
-                onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
-                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-              >📄 Download TXT</button>
-            </div>
-          )}
-        </div>
-      </div>
+        
 
       {/* Tab content */}
       {(subTab === "list" || subTab === "done") && (
@@ -1172,13 +1152,13 @@ export default function App() {
 
         {/* Left sidebar — Watch / Read */}
         <div style={{
-          width: 72,
+          width: 48,
           flexShrink: 0,
           background: T.bgHeader,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: "1.2rem",
+          paddingTop: "6.2rem",
           gap: "0.25rem",
           borderRight: `1px solid ${T.border}`,
         }}>
