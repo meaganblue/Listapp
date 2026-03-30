@@ -899,15 +899,37 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
 // ─────────────────────────────────────────────
 // PROFILE SELECT PAGE
 // ─────────────────────────────────────────────
-function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange, onLogout }) {
-  const [newName, setNewName]             = useState("");
+function ProfileSelectPage({ profiles, onSelect, onAdd, onEdit, onDelete, theme: T }) {
+  const [newName, setNewName] = useState("");
   const [addingProfile, setAddingProfile] = useState(false);
-  const [editingTheme, setEditingTheme]   = useState(null);
-  const [showManual, setShowManual]       = useState(false);
+  const [editingTheme, setEditingTheme] = useState(null);
+  const [showManual, setShowManual] = useState(false);
   const inputRef = useRef(null);
-  useEffect(() => { if (addingProfile) inputRef.current?.focus(); }, [addingProfile]);
 
   return (
+    <div style={{ 
+      minHeight: "100vh", 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center", 
+      justifyContent: "center", 
+      padding: "2rem",
+      backgroundImage: "url('/Icon.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      position: "relative"
+    }}>
+      {/* Dark Overlay for Readability */}
+      <div style={{ 
+        position: "absolute", 
+        inset: 0, 
+        backgroundColor: "rgba(0, 0, 0, 0.5)", 
+        zIndex: 0 
+      }} />
+
+      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: "400px", textAlign: "center" }}>
+
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", fontFamily: "Georgia, serif" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
       <div style={{ color: "#E0D4FF", fontSize: "2rem", marginBottom: "0.3rem", letterSpacing: "0.08em" }}>✦ Lists</div>
