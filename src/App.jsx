@@ -992,9 +992,9 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.transform = "translateY(0)"; }}
               >
-                <div style={{ width: 54, height: 54, borderRadius: "50%", background: Th.bgHeader, border: `2px solid ${Th.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{u.avatar}</div>
-                <div style={{ color: "#E0D4FF", fontSize: "0.88rem" }}>{u.name}</div>
-                <div style={{ color: "#8888BB", fontSize: "0.62rem", letterSpacing: "0.08em" }}>{Th.emoji} {Th.name.split(" ").slice(0,2).join(" ")}</div>
+                <span style={{ display: "block", width: 54, height: 54, borderRadius: "50%", background: Th.bgHeader, border: `2px solid ${Th.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>{u.avatar}</span>
+                <span style={{ display: "block", color: "#E0D4FF", fontSize: "0.88rem" }}>{u.name}</span>
+                <span style={{ display: "block", color: "#8888BB", fontSize: "0.62rem", letterSpacing: "0.08em" }}>{Th.emoji} {Th.name.split(" ").slice(0,2).join(" ")}</span>
               </button>
               <div style={{ display: "flex", gap: "0.3rem", justifyContent: "center", marginTop: "0.5rem" }}>
                 <button onClick={() => setEditingTheme(editingTheme === u.id ? null : u.id)}
@@ -1049,7 +1049,7 @@ function ProfileSelectPage({ profiles, onSelect, onAdd, onRemove, onThemeChange,
       </div>{/* end zIndex wrapper */}
     </div>
   );
-}
+                      }
 
 // ─────────────────────────────────────────────
 // ROOT APP — left sidebar for Watch/Read, no outer border
