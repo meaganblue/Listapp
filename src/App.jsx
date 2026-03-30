@@ -1246,7 +1246,7 @@ export default function App() {
                 border: "none",
                 borderLeft: active ? `3px solid ${T.accent}` : "3px solid transparent",
                 borderRight: "none",
-                borderRadius: "6px 6px 0 0",
+                borderRadius: "6px 0 6px 0",
                 color: active ? T.accent : "rgba(255,255,255,0.6)",
                 padding: "3.7rem 0",
                 height: "14.5rem",
