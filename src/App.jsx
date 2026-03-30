@@ -1193,7 +1193,7 @@ export default function App() {
                 borderRight: "none",
                 color: active ? T.accent : "rgba(255,255,255,0.6)",
                 padding: "0.7rem 0",
-                height: "8.2rem",
+                height: "24.5rem",
                 cursor: "pointer",
                 display: "flex",
                 flexDirection: "column",
