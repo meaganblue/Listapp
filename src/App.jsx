@@ -894,10 +894,22 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
 
       {/* Tab content */}
       {(subTab === "list" || subTab === "done") && (
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.85rem" }}>
-          <input value={search} onChange={e => setSearch(e.target.value)}
+        <div style={{ 
+          display: "flex", 
+          gap: "0.5rem", 
+          marginBottom: "0.85rem" }}>
+          <input 
+            value={search} 
+            onChange={e => setSearch(e.target.value)}
             placeholder={subTab === "list" ? "Search titles…" : "Search finished…"}
-            style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.35rem 0.65rem", fontSize: "0.82rem", fontFamily: T.font, outline: "none" }} />
+            style={{ 
+              flex: 1, 
+              background: T.bgInput, 
+              border: `1px solid ${T.border}`, 
+              borderRadius: "6px 0 0 0",
+              color: T.text, 
+              padding: "0.35rem 0.65rem", 
+              fontSize: "0.82rem", fontFamily: T.font, outline: "none" }} />
         </div>
       )}
 
@@ -1246,7 +1258,7 @@ export default function App() {
                 border: "none",
                 borderLeft: active ? `3px solid ${T.accent}` : "3px solid transparent",
                 borderRight: "none",
-                borderRadius: "6px 0 6px 0",
+                borderRadius: "6px 0 0 6px",
                 color: active ? T.accent : "rgba(255,255,255,0.6)",
                 padding: "3.7rem 0",
                 height: "14.5rem",
