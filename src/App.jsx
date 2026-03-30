@@ -1178,7 +1178,7 @@ export default function App() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: "6.2rem",
+          paddingTop: "8.2rem",
           gap: "0.25rem",
           borderRight: `1px solid ${T.border}`,
         }}>
@@ -1193,6 +1193,7 @@ export default function App() {
                 borderRight: "none",
                 color: active ? T.accent : "rgba(255,255,255,0.6)",
                 padding: "0.7rem 0",
+                height: "8.2rem",
                 cursor: "pointer",
                 display: "flex",
                 flexDirection: "column",
