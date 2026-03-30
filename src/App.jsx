@@ -1234,8 +1234,6 @@ export default function App() {
         </div>
       </div>
 
-      
-
         {/* Main content */}
         <div style={{ flex: 1, overflowY: "auto", padding: "1.2rem 1.1rem 4rem" }}>
           {mainTab === "watch" && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
@@ -1245,9 +1243,6 @@ export default function App() {
 
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
     </div>
-  );
-    }
-
       {/* ── BODY: left sidebar + content ── */}
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
 
@@ -1292,3 +1287,5 @@ export default function App() {
             );
           })}
         </div>
+  );
+              }
