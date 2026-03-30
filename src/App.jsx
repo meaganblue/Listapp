@@ -1235,6 +1235,7 @@ export default function App() {
           alignItems: "center",
           paddingTop: "8.2rem",
           gap: "0.25rem",
+       borderRadius: "6px 0 6px 0",
           borderRight: `1px solid ${T.border}`,
         }}>
           {mainTabs.map(t => {
@@ -1247,7 +1248,7 @@ export default function App() {
                 borderLeft: active ? `3px solid ${T.accent}` : "3px solid transparent",
                 borderRight: "none",
                 color: active ? T.accent : "rgba(255,255,255,0.6)",
-                padding: "0.7rem 0",
+                padding: "3.7rem 0",
                 height: "14.5rem",
                 cursor: "pointer",
                 display: "flex",
