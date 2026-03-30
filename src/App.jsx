@@ -856,7 +856,6 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
           )}
         </div>
       </div>
-
       {subTab === "list" && (
         <>
           <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
@@ -889,46 +888,6 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
         </>
       )}
 
-
-      {subTab === "done" && (
-        <>
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-            <input 
-              value={search} 
-              onChange={e => setSearch(e.target.value)} 
-              placeholder="Search finished items..."
-              style={{ flex: 1, background: T.bgInput, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, padding: "0.38rem 0.7rem", fontSize: "0.83rem", fontFamily: T.font, outline: "none" }} 
-            />
-          </div>
-          {Object.entries(sections).map(([key, def]) => (
-            <MainSection 
-              key={key} 
-              sectionKey={key} 
-              sectionDef={def} 
-              items={items} 
-              onCycle={cycleStatus} 
-              onRemove={removeItem} 
-              onRateRequest={setRatingItem} 
-              onEdit={setEditingItem} 
-              onDescUpdate={updateDesc} 
-              theme={T} 
-              search={search} 
-              statusFilter={doneStatus} 
-              isArchive={true} 
-            />
-          ))}
-        </>
-      )}
-
-
-      {subTab === "wip" && (
-        <ArchiveSection items={wipItems} onCycle={cycleStatus} onRateRequest={setRatingItem} onRemove={removeItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T}
-          title={listType === "watch" ? "Currently watching" : "Currently reading"} emptyMsg="Nothing in progress." canCycle={true} />
-      )}
-      {subTab === "done" && (
-        <ArchiveSection items={doneItems} onRateRequest={setRatingItem} onRemove={removeItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T}
-          title={listType === "watch" ? "Finished" : "Finished reading"} emptyMsg="Nothing finished yet." />
-      )}
 
       {ratingItem && <RatingModal item={ratingItem} onRate={r => rateItem(ratingItem.id, r)} onClose={() => setRatingItem(null)} theme={T} />}
       {editingItem && <EditModal item={editingItem} sections={sections} onSave={changes => saveEdit(editingItem.id, changes)} onClose={() => setEditingItem(null)} theme={T} listType={listType} />}
