@@ -796,6 +796,7 @@ export default function App() {
           setUsers(prev => prev.filter(u => u.id !== id));
         }}
         onThemeChange={async (id, theme) => {
+          loadFont(theme);
           setUsers(prev => prev.map(u => {
             if (u.id !== id) return u;
             const updated = { ...u, theme };
@@ -808,7 +809,9 @@ export default function App() {
   }
 
   const user = users.find(u => u.id === activeUser);
-  const T = THEMES[user.theme || "gilmore"];
+  const themeKey = (user && user.theme) ? user.theme : "gilmore";
+  loadFont(themeKey);
+  const T = THEMES[themeKey] || THEMES.gilmore;
 
   const mainTabs = [
     { key: "watch", label: "🎬 Watch" },
