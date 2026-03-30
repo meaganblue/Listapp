@@ -12,7 +12,7 @@ const THEMES = {
     text: "#1B2A6B", textMid: "#3D4F8A", textMuted: "#8A7A3A", textFaint: "#C9A84C",
     accent: "#C9A84C", danger: "#8B1A1A",
     pillOn: "#1B2A6B", pillOnText: "#FDF6E3", pillOff: "#EDE4C0", pillOffText: "#3D4F8A",
-    sectionBg: "#EDE4C0", sectionBorder: "#C9A84C",
+    sectionBg: "#EDE4C0", sectionBorder: "#C9A84C", borderRadius: "6px 0 0 0",
     font: "'Palatino Linotype', 'Book Antiqua', Palatino, serif",
     headerFont: "'Georgia', serif",
   },
@@ -650,7 +650,7 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
 
   return (
     <div style={{ marginBottom: "0.85rem" }}>
-      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: "6px 6px 0 0", padding: "0.42rem 0.75rem", cursor: "pointer", marginBottom: open ? "0.4rem" : 0 }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: T.sectionBg, border: `1px solid ${T.sectionBorder}`, borderRadius: 6, padding: "0.42rem 0.75rem", cursor: "pointer", marginBottom: open ? "0.4rem" : 0 }}>
         <span style={{ fontSize: "0.9rem" }}>{sectionDef.icon}</span>
         <span style={{ fontSize: "0.82rem", fontFamily: T.headerFont, color: T.text, fontWeight: "bold" }}>{sectionKey}</span>
         <span style={{ fontSize: "0.67rem", color: T.textMuted }}>({filtered.length})</span>
