@@ -783,21 +783,40 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, color: T.text, display: "flex", flexDirection: "column" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
 
-      {/* HEADER */}
-      <div style={{ background: T.bgHeader, padding: "0.6rem 1rem", position: "sticky", top: 0, zIndex: 20, flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "1.05rem" }}>{profile.avatar}</span>
-            <span style={{ fontSize: "0.88rem", fontFamily: T.headerFont, color: "#fff", fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-            <button onClick={() => setShowManual(true)} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, color: "rgba(255,255,255,0.75)", padding: "0.22rem 0.5rem", fontSize: "0.65rem", fontFamily: T.font, cursor: "pointer" }}>?</button>
+      {/*
+        HEADER — same base color as page, no contrasting band.
+        Binder tabs hang off the RIGHT side of the header, flush with the top.
+        They extend below the header into the content area via negative bottom margin.
+      */}
+      <div style={{
+        background: T.bg,
+        borderBottom: `1px solid ${T.border}`,
+        padding: "0.55rem 0 0 1rem",
+        position: "sticky",
+        top: 0,
+        zIndex: 20,
+        flexShrink: 0,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "space-between",
+      }}>
+        {/* Left: avatar + name */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", paddingBottom: "0.45rem" }}>
+          <span style={{ fontSize: "1.05rem" }}>{profile.avatar}</span>
+          <span style={{ fontSize: "0.88rem", fontFamily: T.headerFont, color: T.text, fontWeight: "bold", letterSpacing: "0.04em" }}>{profile.name}'s Lists</span>
+        </div>
+
+        {/* Right: binder tabs + utility buttons */}
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 0 }}>
+          {/* Utility buttons sit beside the tabs, vertically centered */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.3rem", paddingBottom: "0.45rem", marginRight: "0.5rem" }}>
+            <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, color: T.textMuted, padding: "0.18rem 0.42rem", fontSize: "0.62rem", fontFamily: T.font, cursor: "pointer" }}>?</button>
             <div style={{ position: "relative" }}>
-              <button onClick={() => setShowSwitch(s => !s)} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 6, padding: "0.22rem 0.6rem", fontSize: "0.65rem", fontFamily: T.font, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+              <button onClick={() => setShowSwitch(s => !s)} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, padding: "0.18rem 0.55rem", fontSize: "0.62rem", fontFamily: T.font, color: T.textMuted, cursor: "pointer", display: "flex", alignItems: "center", gap: "0.22rem" }}>
                 <span>⇄</span><span>Switch</span>
               </button>
               {showSwitch && (
-                <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.5rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0.5rem", zIndex: 100, minWidth: 160, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+                <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.4rem)", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "0.5rem", zIndex: 100, minWidth: 160, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
                   {profiles.map(p => (
                     <button key={p.id} onClick={() => { setActiveProfile(p.id); setShowSwitch(false); setMainTab("watch"); }}
                       style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", background: p.id === activeProfile ? T.sectionBg : "transparent", border: "none", borderRadius: 6, padding: "0.42rem 0.6rem", cursor: "pointer", color: T.text, fontSize: "0.82rem", fontFamily: T.font, marginBottom: "0.12rem" }}>
@@ -812,60 +831,39 @@ export default function App() {
               )}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* BODY: scrollable content + card-index tabs on the RIGHT */}
-      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-
-        {/* Content */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "1rem 0.75rem 4rem 1rem" }}>
-          {mainTab === "watch" && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
-          {mainTab === "read"  && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} profileName={profile.name} />}
-        </div>
-
-        {/* Right-side card-index tab strip — sticky binder tabs */}
-        <div style={{
-          flexShrink: 0,
-          width: 32,
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "flex-end",
-          gap: 4,
-          // No background — tabs float against the page bg
-        }}>
+          {/* Binder tabs — hang off top of page, extend 6px below header border */}
           {mainTabs.map(t => {
             const active = mainTab === t.key;
             return (
               <button key={t.key} onClick={() => setMainTab(t.key)} title={t.label}
                 style={{
-                  width: active ? 32 : 28,
-                  height: 72,
+                  // Tabs are taller than the header and bleed down 6px below the border line
+                  height: 52,
+                  width: 46,
+                  marginBottom: active ? -1 : -1,
                   background: active ? T.bg : T.sectionBg,
                   border: `1px solid ${T.border}`,
-                  // Active tab: hide the left border so it merges with the content area
-                  borderLeft: active ? `1px solid ${T.bg}` : `1px solid ${T.border}`,
-                  borderRadius: "0 6px 6px 0",
+                  // Active tab: hide bottom border so content area flows through
+                  borderBottom: active ? `1px solid ${T.bg}` : `1px solid ${T.border}`,
+                  borderRadius: "6px 6px 0 0",
                   cursor: "pointer",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 3,
-                  // Inactive tabs indent slightly from the right edge
-                  marginRight: active ? 0 : 4,
-                  boxShadow: active ? "2px 0 8px rgba(0,0,0,0.14)" : "none",
-                  transition: "all 0.14s",
+                  marginLeft: 2,
+                  transition: "all 0.13s",
                   position: "relative",
-                  zIndex: active ? 3 : 1,
+                  zIndex: active ? 5 : 2,
+                  // Active tab slightly taller — pops up like a real binder tab
+                  paddingTop: active ? 0 : 3,
+                  boxShadow: active ? "0 -2px 6px rgba(0,0,0,0.08)" : "none",
                 }}>
-                <span style={{ fontSize: "0.95rem", lineHeight: 1 }}>{t.emoji}</span>
+                <span style={{ fontSize: "1rem", lineHeight: 1 }}>{t.emoji}</span>
                 <span style={{
-                  fontSize: "0.42rem",
+                  fontSize: "0.44rem",
                   fontFamily: T.font,
                   letterSpacing: "0.05em",
                   color: active ? T.accent : T.textMuted,
@@ -876,6 +874,12 @@ export default function App() {
             );
           })}
         </div>
+      </div>
+
+      {/* BODY — single scrollable column, no sidebar */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1rem 4rem 1rem" }}>
+        {mainTab === "watch" && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
+        {mainTab === "read"  && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} profileName={profile.name} />}
       </div>
 
       {showSwitch && <div style={{ position: "fixed", inset: 0, zIndex: 15 }} onClick={() => setShowSwitch(false)} />}
