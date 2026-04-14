@@ -122,45 +122,11 @@ async function dbDeleteItem(userId, itemId, listType) {
   await supabase.from(table).delete().eq("id", itemId).eq("user_id", userId);
 }
 
-// ── AI ───────────────────────────────────────
-async function callClaude(prompt, maxTokens = 100) {
-  const resp = await fetch("/api/claude", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens: maxTokens, messages: [{ role: "user", content: prompt }] }),
-  });
-  const data = await resp.json();
-  return data?.content?.[0]?.text?.trim() || "";
-}
-
-async function autoDetectGenre(title, listType) {
-  const sections = listType === "watch" ? Object.keys(WATCH_SECTIONS) : Object.keys(READ_SECTIONS);
-  const allGenres = listType === "watch"
-    ? [...new Set(Object.values(WATCH_SECTIONS).flatMap(s => s.genres))]
-    : [...new Set(Object.values(READ_SECTIONS).flatMap(s => s.genres))];
-  const prompt = `For the ${listType === "watch" ? "film/show/documentary" : "book"} titled "${title}", return ONLY a JSON object with keys "section" (one of [${sections.map(s => `"${s}"`).join(", ")}]), "genres" (array of 1-3 from [${allGenres.map(g => `"${g}"`).join(", ")}]), "desc" (one sentence max 20 words). Return only JSON.`;
-  try {
-    const raw = await callClaude(prompt, 150);
-    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
-    return { section: parsed.section || sections[0], genres: Array.isArray(parsed.genres) ? parsed.genres.slice(0,3) : [parsed.genres||"Other"], desc: parsed.desc || "" };
-  } catch { return { section: sections[0], genres: ["Other"], desc: "" }; }
-}
-
-async function fetchTitleSuggestions(query, listType) {
-  if (!query || query.length < 2) return [];
-  const typeHint = listType === "watch" ? "films, TV shows, and documentaries" : "books";
-  const prompt = `List 6 real ${typeHint} whose titles start with or closely match "${query}". Return ONLY a JSON array of objects with keys "title" and "year". No other text.`;
-  try {
-    const raw = await callClaude(prompt, 200);
-    return JSON.parse(raw.replace(/```json|```/g, "").trim());
-  } catch { return []; }
-}
-
 // ── MANUAL MODAL ─────────────────────────────
 function ManualModal({ onClose }) {
   const sections = [
     { title: "Getting Started", content: "Create an account with a username and password — no email needed. Create up to 4 profiles per account." },
-    { title: "Adding Titles", content: "Tap '+ Add title' or '+ Add book'. Start typing for AI suggestions. Genre and section are auto-detected." },
+    { title: "Adding Titles", content: "Tap '+ Add title' or '+ Add book'. Enter the title, pick a section and genre, and optionally add a description." },
     { title: "Tracking Progress", content: "Tap the status dot to cycle: To Watch → Watching → Watched (or To Read → Reading → Read)." },
     { title: "Ratings", content: "Once something is marked Watched/Read, a Rate button appears. Rate 1–5 stars." },
     { title: "Editing Entries", content: "Tap ✎ to edit section, genre tags (up to 3), notes, and author. Tap a title to expand and see its description." },
@@ -328,22 +294,8 @@ function EditModal({ item, sections, onSave, onClose, theme: T, listType }) {
 }
 
 // ── ITEM ROW ─────────────────────────────────
-function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, isArchive }) {
+function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, theme: T, isArchive }) {
   const [expanded, setExpanded] = useState(false);
-  const [loadingDesc, setLoadingDesc] = useState(false);
-  const [desc, setDesc] = useState(item.desc || "");
-
-  const handleExpand = async () => {
-    setExpanded(e => !e);
-    if (!desc && !expanded) {
-      setLoadingDesc(true);
-      try {
-        const result = await callClaude(`One sentence description (max 20 words) of "${item.title}". Return only the sentence, no quotes.`, 80);
-        setDesc(result); onDescUpdate(item.id, result);
-      } catch {}
-      setLoadingDesc(false);
-    }
-  };
 
   const done = item.status === "watched" || item.status === "read";
   const wip  = item.status === "watching" || item.status === "reading";
@@ -358,7 +310,7 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
           onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
         >{done ? "✓" : wip ? "▶" : ""}</button>
 
-        <button onClick={handleExpand} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0, minWidth: 0 }}>
+        <button onClick={() => setExpanded(e => !e)} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: 0, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: "0.3rem", lineHeight: 1.3 }}>
             <span style={{ fontSize: "0.85rem", color: done ? T.textMuted : T.text, textDecoration: done ? "line-through" : "none", fontFamily: T.font, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>{item.title}</span>
             {item.author && <span style={{ fontSize: "0.65rem", color: T.textMuted, fontStyle: "italic", whiteSpace: "nowrap" }}>by {item.author}</span>}
@@ -375,7 +327,7 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
         <div style={{ padding: "0 0.75rem 0.65rem", borderTop: `1px solid ${T.borderLight}` }}>
           {item.notes && <div style={{ fontSize: "0.7rem", color: T.textMuted, marginTop: "0.4rem", fontStyle: "italic" }}>{item.notes}</div>}
           <div style={{ fontSize: "0.75rem", color: T.textMid, marginTop: "0.4rem", lineHeight: 1.55 }}>
-            {loadingDesc ? "Fetching description…" : desc || <span style={{ color: T.textFaint }}>No description available.</span>}
+            {item.desc || <span style={{ color: T.textFaint }}>No description.</span>}
           </div>
           {!isArchive && (
             <button onClick={() => onCycle(item.id)} style={{ marginTop: "0.55rem", background: "transparent", border: `1px solid ${T.border}`, borderRadius: 4, color: T.textMid, padding: "0.22rem 0.6rem", fontSize: "0.7rem", fontFamily: T.font, cursor: "pointer" }}>
@@ -389,7 +341,7 @@ function ItemRow({ item, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate,
 }
 
 // ── GENRE SECTION ────────────────────────────
-function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, isArchive }) {
+function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, theme: T, isArchive }) {
   const [open, setOpen] = useState(false);
   if (items.length === 0) return null;
   const sorted = [...items].sort((a, b) => (b.rating||0) - (a.rating||0) || b.added - a.added);
@@ -400,13 +352,13 @@ function GenreSection({ genre, items, onCycle, onRemove, onRateRequest, onEdit, 
         <span style={{ flex: 1, height: 1, background: T.borderLight }} />
         <span style={{ fontSize: "0.58rem", color: T.textFaint }}>{items.length} {open ? "▲" : "▼"}</span>
       </button>
-      {open && sorted.map(item => <ItemRow key={item.id} item={item} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} isArchive={isArchive} />)}
+      {open && sorted.map(item => <ItemRow key={item.id} item={item} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} theme={T} isArchive={isArchive} />)}
     </div>
   );
 }
 
 // ── MAIN SECTION ─────────────────────────────
-function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateRequest, onEdit, onDescUpdate, theme: T, search, statusFilter, isArchive }) {
+function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateRequest, onEdit, theme: T, search, statusFilter, isArchive }) {
   const [open, setOpen] = useState(false);
   const filtered = items.filter(i => i.section === sectionKey && i.status === statusFilter && (i.title.toLowerCase().includes(search.toLowerCase()) || (i.author && i.author.toLowerCase().includes(search.toLowerCase()))));
   if (filtered.length === 0) return null;
@@ -421,78 +373,166 @@ function MainSection({ sectionKey, sectionDef, items, onCycle, onRemove, onRateR
         <span style={{ fontSize: "0.67rem", color: T.textMuted }}>({filtered.length})</span>
         <span style={{ marginLeft: "auto", fontSize: "0.65rem", color: T.textMuted }}>{open ? "▲" : "▼"}</span>
       </button>
-      {open && <div style={{ paddingLeft: "0.35rem" }}>{sectionDef.genres.map(g => <GenreSection key={g} genre={g} items={byGenre[g]||[]} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} onDescUpdate={onDescUpdate} theme={T} isArchive={isArchive} />)}</div>}
+      {open && <div style={{ paddingLeft: "0.35rem" }}>{sectionDef.genres.map(g => <GenreSection key={g} genre={g} items={byGenre[g]||[]} onCycle={onCycle} onRemove={onRemove} onRateRequest={onRateRequest} onEdit={onEdit} theme={T} isArchive={isArchive} />)}</div>}
     </div>
   );
 }
 
 // ── ADD FORM ─────────────────────────────────
 function AddForm({ sections, onAdd, onClose, theme: T, listType }) {
-  const [title, setTitle]       = useState("");
-  const [author, setAuthor]     = useState("");
-  const [detecting, setDetecting] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSugg, setShowSugg] = useState(false);
-  const [loadingSugg, setLoadingSugg] = useState(false);
-  const [syncToOther, setSyncToOther] = useState(false);
+  const sectionKeys = Object.keys(sections);
+  const [title, setTitle]             = useState("");
+  const [author, setAuthor]           = useState("");
+  const [desc, setDesc]               = useState("");
+  const [section, setSection]         = useState(sectionKeys[0]);
+  const [selectedGenres, setSelectedGenres] = useState(["Other"]);
   const inputRef = useRef(null);
-  const suggTimer = useRef(null);
+
   useEffect(() => { inputRef.current?.focus(); }, []);
 
-  const handleTitleChange = val => {
-    setTitle(val); setShowSugg(true); clearTimeout(suggTimer.current);
-    if (val.length < 2) { setSuggestions([]); return; }
-    setLoadingSugg(true);
-    suggTimer.current = setTimeout(async () => { setSuggestions(await fetchTitleSuggestions(val, listType)); setLoadingSugg(false); }, 600);
+  const availableGenres = sections[section]?.genres || ["Other"];
+
+  const handleSectionChange = val => {
+    setSection(val);
+    setSelectedGenres(["Other"]);
   };
 
-  const handleAdd = async () => {
+  const toggleGenre = g => setSelectedGenres(prev =>
+    prev.includes(g) ? prev.filter(x => x !== g) : prev.length < 3 ? [...prev, g] : prev
+  );
+
+  const handleAdd = () => {
     if (!title.trim()) return;
-    setDetecting(true);
-    const detected = await autoDetectGenre(title.trim(), listType);
-    setDetecting(false);
-    onAdd({ title: title.trim(), author: author.trim(), ...detected }, syncToOther);
+    onAdd({
+      title: title.trim(),
+      author: author.trim(),
+      desc: desc.trim(),
+      section,
+      genres: selectedGenres,
+      genre: selectedGenres[0] || "Other",
+    });
+  };
+
+  const fieldStyle = {
+    width: "100%",
+    background: "transparent",
+    border: "none",
+    borderBottom: `1px solid ${T.border}`,
+    color: T.text,
+    padding: "0.35rem 0",
+    fontSize: "0.88rem",
+    fontFamily: T.font,
+    outline: "none",
+    boxSizing: "border-box",
+  };
+
+  const labelStyle = {
+    fontSize: "0.68rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: T.textMuted,
+    display: "block",
+    marginBottom: "0.35rem",
   };
 
   return (
-    <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "1rem", marginBottom: "1rem", position: "relative" }}>
-      <div style={{ position: "relative" }}>
-        <input ref={inputRef} value={title} onChange={e => handleTitleChange(e.target.value)}
+    <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "1rem", marginBottom: "1rem" }}>
+
+      {/* Title */}
+      <div style={{ marginBottom: "0.85rem" }}>
+        <input
+          ref={inputRef}
+          value={title}
+          onChange={e => setTitle(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter" && title.trim()) handleAdd(); if (e.key === "Escape") onClose(); }}
-          onBlur={() => setTimeout(() => setShowSugg(false), 200)}
-          placeholder="Title… (type to search)"
-          style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${T.border}`, color: T.text, padding: "0.35rem 0", fontSize: "1rem", fontFamily: T.font, outline: "none", marginBottom: "0.5rem", boxSizing: "border-box" }} />
-        {showSugg && (suggestions.length > 0 || loadingSugg) && (
-          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, zIndex: 50, boxShadow: "0 4px 16px rgba(0,0,0,0.15)", maxHeight: 220, overflowY: "auto" }}>
-            {loadingSugg && <div style={{ padding: "0.6rem 0.85rem", fontSize: "0.75rem", color: T.textFaint }}>Searching…</div>}
-            {suggestions.map((s, i) => (
-              <button key={i} onMouseDown={() => { setTitle(s.title); setShowSugg(false); setSuggestions([]); }}
-                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "transparent", border: "none", padding: "0.55rem 0.85rem", cursor: "pointer", textAlign: "left", borderBottom: `1px solid ${T.borderLight}` }}
-                onMouseEnter={e => e.currentTarget.style.background = T.sectionBg}
-                onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                <span style={{ fontSize: "0.85rem", color: T.text, fontFamily: T.font }}>{s.title}</span>
-                {s.year && <span style={{ fontSize: "0.7rem", color: T.textFaint }}>{s.year}</span>}
-              </button>
-            ))}
-          </div>
-        )}
+          placeholder={listType === "watch" ? "Title…" : "Title…"}
+          style={{ ...fieldStyle, fontSize: "1rem" }}
+        />
       </div>
+
+      {/* Author (read only) */}
       {listType === "read" && (
-        <input value={author} onChange={e => setAuthor(e.target.value)} placeholder="Author (optional)"
-          style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${T.borderLight}`, color: T.text, padding: "0.3rem 0", fontSize: "0.88rem", fontFamily: T.font, outline: "none", marginBottom: "0.75rem", boxSizing: "border-box", fontStyle: "italic" }} />
+        <div style={{ marginBottom: "0.85rem" }}>
+          <input
+            value={author}
+            onChange={e => setAuthor(e.target.value)}
+            placeholder="Author (optional)"
+            style={{ ...fieldStyle, fontStyle: "italic" }}
+          />
+        </div>
       )}
-      <div style={{ marginBottom: "0.75rem" }}>
-        <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer", fontSize: "0.72rem", color: T.textMuted }}>
-          <input type="checkbox" checked={syncToOther} onChange={e => setSyncToOther(e.target.checked)} style={{ cursor: "pointer", accentColor: T.accent }} />
-          Also add to {listType === "watch" ? "Reading List" : "Watch List"}?
-        </label>
+
+      {/* Description */}
+      <div style={{ marginBottom: "0.85rem" }}>
+        <label style={labelStyle}>Description <span style={{ color: T.textFaint, textTransform: "none", letterSpacing: 0 }}>(optional)</span></label>
+        <textarea
+          value={desc}
+          onChange={e => setDesc(e.target.value)}
+          placeholder="A short description…"
+          rows={2}
+          style={{
+            ...fieldStyle,
+            borderBottom: "none",
+            border: `1px solid ${T.border}`,
+            borderRadius: 6,
+            padding: "0.4rem 0.6rem",
+            resize: "vertical",
+            background: T.bgInput,
+            lineHeight: 1.5,
+          }}
+        />
       </div>
-      {detecting && <div style={{ fontSize: "0.75rem", color: T.textMuted, marginBottom: "0.5rem" }}>✨ Auto-detecting genre…</div>}
+
+      {/* Section */}
+      <div style={{ marginBottom: "0.85rem" }}>
+        <label style={labelStyle}>Section</label>
+        <select
+          value={section}
+          onChange={e => handleSectionChange(e.target.value)}
+          style={{
+            width: "100%",
+            background: T.bgInput,
+            border: `1px solid ${T.border}`,
+            borderRadius: 6,
+            color: T.text,
+            padding: "0.4rem 0.6rem",
+            fontSize: "0.85rem",
+            fontFamily: T.font,
+            outline: "none",
+          }}
+        >
+          {sectionKeys.map(s => <option key={s} value={s}>{sections[s].icon} {s}</option>)}
+        </select>
+      </div>
+
+      {/* Genres */}
+      <div style={{ marginBottom: "1rem" }}>
+        <label style={labelStyle}>Genre <span style={{ color: T.textFaint, textTransform: "none", letterSpacing: 0 }}>(up to 3)</span></label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+          {availableGenres.map(g => (
+            <button
+              key={g}
+              onClick={() => toggleGenre(g)}
+              style={{
+                background: selectedGenres.includes(g) ? T.accent : T.sectionBg,
+                border: `1px solid ${selectedGenres.includes(g) ? T.accent : T.border}`,
+                borderRadius: 20,
+                color: selectedGenres.includes(g) ? "#fff" : T.textMid,
+                padding: "0.22rem 0.65rem",
+                fontSize: "0.75rem",
+                fontFamily: T.font,
+                cursor: "pointer",
+                transition: "all 0.12s",
+              }}
+            >{g}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Actions */}
       <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
         <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, color: T.textMuted, padding: "0.3rem 0.85rem", fontSize: "0.8rem", fontFamily: T.font, cursor: "pointer" }}>Cancel</button>
-        <button onClick={handleAdd} disabled={detecting || !title.trim()} style={{ background: T.accent, border: "none", borderRadius: 5, color: "#fff", padding: "0.3rem 0.95rem", fontSize: "0.8rem", fontFamily: T.font, cursor: detecting ? "not-allowed" : "pointer", fontWeight: "bold", opacity: detecting ? 0.7 : 1 }}>
-          {detecting ? "…" : "Add"}
-        </button>
+        <button onClick={handleAdd} disabled={!title.trim()} style={{ background: T.accent, border: "none", borderRadius: 5, color: "#fff", padding: "0.3rem 0.95rem", fontSize: "0.8rem", fontFamily: T.font, cursor: !title.trim() ? "not-allowed" : "pointer", fontWeight: "bold", opacity: !title.trim() ? 0.6 : 1 }}>Add</button>
       </div>
     </div>
   );
@@ -529,17 +569,22 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
     setItems(prev => prev.filter(i => i.id !== id));
   }, [userId, listType]);
 
-  const addItem = async ({ title, section, genres, genre, desc, author }, alsoAddToOther = false) => {
+  const addItem = async ({ title, section, genres, genre, desc, author }) => {
     const id = Date.now();
-    const newItem = { id, title, section, genre: genre||genres?.[0]||"Other", genres: genres||[], notes: "", status: todoStatus, added: id, desc: desc||"", rating: 0, _listType: listType, author: author||"" };
+    const newItem = {
+      id, title, section,
+      genre: genre || genres?.[0] || "Other",
+      genres: genres || [],
+      notes: "",
+      status: todoStatus,
+      added: id,
+      desc: desc || "",
+      rating: 0,
+      _listType: listType,
+      author: author || "",
+    };
     await dbAddItem(userId, newItem, listType);
     setItems(prev => [newItem, ...prev]);
-    if (alsoAddToOther) {
-      const otherType = listType === "watch" ? "read" : "watch";
-      const detected = await autoDetectGenre(title, otherType);
-      const synced = { id: id+1, title, author: author||"", ...detected, genre: detected.genres?.[0]||"Other", notes: "Auto-synced", status: otherType === "read" ? "unread" : "unwatched", added: id+1, rating: 0, _listType: otherType };
-      await dbAddItem(userId, synced, otherType);
-    }
     setAdding(false);
   };
 
@@ -552,12 +597,6 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
   const saveEdit = useCallback(async (id, changes) => {
     let updated = null;
     setItems(prev => prev.map(i => { if (i.id !== id) return i; updated = { ...i, ...changes }; return updated; }));
-    if (updated) await dbUpdateItem(userId, updated, listType);
-  }, [userId, listType]);
-
-  const updateDesc = useCallback(async (id, desc) => {
-    let updated = null;
-    setItems(prev => prev.map(i => { if (i.id !== id) return i; updated = { ...i, desc }; return updated; }));
     if (updated) await dbUpdateItem(userId, updated, listType);
   }, [userId, listType]);
 
@@ -617,20 +656,20 @@ function ListPage({ userId, listType, sections, theme: T, profileName }) {
                 + Add {listType === "watch" ? "title" : "book"}
               </button>
           }
-          {Object.entries(sections).map(([key, def]) => <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} statusFilter={todoStatus} isArchive={false} />)}
+          {Object.entries(sections).map(([key, def]) => <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} theme={T} search={search} statusFilter={todoStatus} isArchive={false} />)}
         </>
       )}
 
       {subTab === "wip" && (
         <>
-          {Object.entries(sections).map(([key, def]) => <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} statusFilter={wipStatus} isArchive={false} />)}
+          {Object.entries(sections).map(([key, def]) => <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} theme={T} search={search} statusFilter={wipStatus} isArchive={false} />)}
           {items.filter(i => i.status === wipStatus).length === 0 && <div style={{ color: T.textFaint, fontSize: "0.85rem", padding: "2.5rem 0", textAlign: "center" }}>Nothing {listType === "watch" ? "being watched" : "being read"} right now.</div>}
         </>
       )}
 
       {subTab === "done" && (
         <>
-          {Object.entries(sections).map(([key, def]) => <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} onDescUpdate={updateDesc} theme={T} search={search} statusFilter={doneStatus} isArchive={true} />)}
+          {Object.entries(sections).map(([key, def]) => <MainSection key={key} sectionKey={key} sectionDef={def} items={items} onCycle={cycleStatus} onRemove={removeItem} onRateRequest={setRatingItem} onEdit={setEditingItem} theme={T} search={search} statusFilter={doneStatus} isArchive={true} />)}
           {items.filter(i => i.status === doneStatus).length === 0 && <div style={{ color: T.textFaint, fontSize: "0.85rem", padding: "2.5rem 0", textAlign: "center" }}>Nothing {listType === "watch" ? "watched" : "read"} yet.</div>}
         </>
       )}
@@ -783,11 +822,6 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.font, color: T.text, display: "flex", flexDirection: "column" }}>
       {showManual && <ManualModal onClose={() => setShowManual(false)} />}
 
-      {/*
-        HEADER — same base color as page, no contrasting band.
-        Binder tabs hang off the RIGHT side of the header, flush with the top.
-        They extend below the header into the content area via negative bottom margin.
-      */}
       <div style={{
         background: T.bg,
         borderBottom: `1px solid ${T.border}`,
@@ -808,7 +842,6 @@ export default function App() {
 
         {/* Right: binder tabs + utility buttons */}
         <div style={{ display: "flex", alignItems: "flex-end", gap: 0 }}>
-          {/* Utility buttons sit beside the tabs, vertically centered */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.3rem", paddingBottom: "0.45rem", marginRight: "0.5rem" }}>
             <button onClick={() => setShowManual(true)} style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, color: T.textMuted, padding: "0.18rem 0.42rem", fontSize: "0.62rem", fontFamily: T.font, cursor: "pointer" }}>?</button>
             <div style={{ position: "relative" }}>
@@ -832,19 +865,16 @@ export default function App() {
             </div>
           </div>
 
-          {/* Binder tabs — hang off top of page, extend 6px below header border */}
           {mainTabs.map(t => {
             const active = mainTab === t.key;
             return (
               <button key={t.key} onClick={() => setMainTab(t.key)} title={t.label}
                 style={{
-                  // Tabs are taller than the header and bleed down 6px below the border line
                   height: 52,
                   width: 46,
                   marginBottom: active ? -1 : -1,
                   background: active ? T.bg : T.sectionBg,
                   border: `1px solid ${T.border}`,
-                  // Active tab: hide bottom border so content area flows through
                   borderBottom: active ? `1px solid ${T.bg}` : `1px solid ${T.border}`,
                   borderRadius: "6px 6px 0 0",
                   cursor: "pointer",
@@ -857,7 +887,6 @@ export default function App() {
                   transition: "all 0.13s",
                   position: "relative",
                   zIndex: active ? 5 : 2,
-                  // Active tab slightly taller — pops up like a real binder tab
                   paddingTop: active ? 0 : 3,
                   boxShadow: active ? "0 -2px 6px rgba(0,0,0,0.08)" : "none",
                 }}>
@@ -876,7 +905,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* BODY — single scrollable column, no sidebar */}
       <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1rem 4rem 1rem" }}>
         {mainTab === "watch" && <ListPage key={`w-${profile.id}`} userId={profile.id} listType="watch" sections={WATCH_SECTIONS} theme={T} profileName={profile.name} />}
         {mainTab === "read"  && <ListPage key={`r-${profile.id}`} userId={profile.id} listType="read"  sections={READ_SECTIONS}  theme={T} profileName={profile.name} />}
